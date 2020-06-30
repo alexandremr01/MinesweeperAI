@@ -54,8 +54,8 @@ for episodes in range(1, NUM_EPISODES + 1):
         # Accumulate reward
         cumulative_reward = agent.gamma * cumulative_reward + reward
         if done:
-            out_file.write(str(minesweeper.game.bomb_positions))
-            out_file.write(str(moves))
+            out_file.write(str(minesweeper.game.bomb_positions)+'\n')
+            out_file.write(str(moves)+'\n')
             print("episode: {}/{}, plays: {}, score: {:.6}, epsilon: {:.3}"
                   .format(episodes, NUM_EPISODES, plays, cumulative_reward, agent.epsilon))
             break
