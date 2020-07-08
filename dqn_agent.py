@@ -43,12 +43,6 @@ class DQNAgent:
         self.learning_rate = learning_rate
         self.model = self.make_model()
 
-    def get_cost_function(self):
-        def cost_function(y_true, y_pred):
-            return np.square(np.subtract(Y_true,Y_pred)).mean() 
-
-        return cost_function
-
     def make_model(self):
         """
         Makes the action-value neural network model using Keras.
@@ -100,7 +94,7 @@ class DQNAgent:
         if rand_val > self.epsilon:
             i, j = np.unravel_index(np.argmax(qsa[:, :], axis=None), qsa[:, :].shape)
             if (state[i, j]==MinesweeperCore.UNKNOWN_CELL):
-                    return i, j
+                return i, j
         while True:
             i = random.randint(0, self.side-1)
             j = random.randint(0, self.side-1)

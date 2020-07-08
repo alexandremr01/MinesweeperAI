@@ -3,8 +3,8 @@ from minesweeper import MinesweeperCore
 from csp import MinesweeperAgent
 import numpy as np
 
-size = 30
-bombs = 100
+size = 6
+bombs = 5
 win_threshold = 1.0
 game = MinesweeperEnvironment(size, size, bombs, win_threshold)
 agent = MinesweeperAgent()
@@ -29,20 +29,23 @@ agent = MinesweeperAgent()
 #agent.PlaySimpleStrategy(ans, constraints_var)
 
 next_position = (2, 2)
+game.print_board()
+
 while game.game.isPlaying():
-    #cell = input()
-    #row = int(cell[0])
-    #column = int(cell[2])
+    cell = input()
+    row = int(cell[0])
+    column = int(cell[2])
+    next_position = (row, column)
     game.game.play(*next_position)
     print("Played", next_position)
     game.print_board()
-    board = game.game.get_board()
-    constraints, constrained_var = agent.read(board)
-    coupled_constraints = agent.coupled(constraints,constrained_var)
-    ans = agent.solve(coupled_constraints)
+    #board = game.game.get_board()
+    #constraints, constrained_var = agent.read(board)
+    #coupled_constraints = agent.coupled(constraints,constrained_var)
+    #ans = agent.solve(coupled_constraints)
     #for sol in ans:
         #print(sol)
         #for constraint in constraints:
             #print(constraint.variables)
             #print(constraint.value)
-    next_position = agent.PlaySimpleStrategy(ans,constrained_var)
+    #next_position = agent.PlaySimpleStrategy(ans,constrained_var)
