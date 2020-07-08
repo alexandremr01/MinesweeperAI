@@ -8,7 +8,7 @@ class MinesweeperCore:
     BOMB = -2
     UNKNOWN_CELL = -1
     CLEAR_CELL = 0
-  
+
     def __init__(self, height, width, num_bombs, win_threshold=0.8):
       """
       Basic game configuration and call board initializer.
@@ -40,10 +40,10 @@ class MinesweeperCore:
 
     def isVictory(self):
       return self.victory
-      
+
     def isPlaying(self):
       return self.still_playing
-      
+
     def play(self, x, y):
       if (x>= self.height or y>=self.width or x<0 or y<0):
         return False
@@ -72,7 +72,7 @@ class MinesweeperCore:
         return False
       self.victory = True
       self.still_playing = False
-      
+
     def neighbour_bombs(self, x, y):
       """
       Counts how many neighbour of (x,y) are bombs.
@@ -84,7 +84,7 @@ class MinesweeperCore:
           if (x+i, y+j) in self.bomb_positions:
             neighbours += 1
       return neighbours
-        
+
     def get_board(self, xray = False):
       """
       Returns the board.
@@ -94,5 +94,5 @@ class MinesweeperCore:
       else:
         xray_table = np.copy(self.table)
         for position in self.bomb_positions:
-          xray_table[position[0], position[1]] = self.BOMB 
+          xray_table[position[0], position[1]] = self.BOMB
         return xray_table
