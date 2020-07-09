@@ -3,8 +3,8 @@ from minesweeper import MinesweeperCore
 from csp import MinesweeperAgent
 import numpy as np
 
-size = 30
-bombs = 100
+size = 6
+bombs = 5
 win_threshold = 1.0
 game = MinesweeperEnvironment(size, size, bombs, win_threshold)
 agent = MinesweeperAgent(size)
