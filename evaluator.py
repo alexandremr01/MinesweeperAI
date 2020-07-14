@@ -2,6 +2,7 @@ import numpy as np
 import random
 from minesweeper_environment import MinesweeperEnvironment
 from minesweeper import MinesweeperCore
+from csp import MinesweeperAgent
 import matplotlib.pyplot as plt
 from dqn_agent import DQNAgent
 import os
@@ -26,7 +27,9 @@ game = MinesweeperEnvironment(size, size, bombs)
 victories = 0
 plays_to_die = []
 open_percentage = []
-agent = DQNAgent(size)
+
+#agent = DQNAgent(size)
+agent = MinesweeperAgent(size,bombs)
 
 if os.path.exists('minesweeper.h5'):
     print('Loading weights from previous learning session.')
@@ -36,6 +39,7 @@ else:
 
 for episodes in range(1, NUM_EPISODES + 1):
     state = game.reset()
+    agent.reset()
     plays = 0
     while game.is_finished() != True:
         #action = random_actor(game.get_state()) # Use this to test random policy
@@ -47,7 +51,7 @@ for episodes in range(1, NUM_EPISODES + 1):
         plays += 1
     if game.is_victory():
       victories += 1
-    else: 
+    else:
       plays_to_die.append(plays-1)
     open_percentage.append(game.get_open_percentage())
     print('Played ',episodes,'/',NUM_EPISODES)

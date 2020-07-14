@@ -119,8 +119,9 @@ class MinesweeperAgent:
     """
     Simple strategy Minesweeper agent.
     """
-    def __init__(self, size):
+    def __init__(self, size, num_bombs):
         self.initial_position = (int(size/2), int(size/2))
+        self.num_bombs = num_bombs
         self.constraints = []
         self.nobomb_position = [self.initial_position]
         self.bomb_position = []
@@ -194,7 +195,11 @@ class MinesweeperAgent:
             for constraint in constraints:
                 if variable in constraint.variables:
                     list.append(constraint)
-            coupled_constraints.append(list)
+            sum_bombs = 0
+            for constraint in list:
+                sum_bombs = sum_bombs + constraint.value
+            if(sum_bombs <= self.num_bombs - len(self.bomb_position)):
+                coupled_constraints.append(list)
         return coupled_constraints
 
     def read_board(self, board):
@@ -333,6 +338,12 @@ class MinesweeperAgent:
             if(len(constraint.variables) == 1):
                 if(constraint.value == 0):
                     self.nobomb_position.append(constraint.variables[0])
-                else:
+                elif(constraint.variables[0] not in self.bomb_position):
                     self.bomb_position.append(constraint.variables[0])
-        return self.constraints, constrained_var
+                self.constraints.remove(constraint)
+        # Removes trivials contraints from constrained_var
+        non_trivials_constrained_var = []
+        for variable in constrained_var:
+            if(variable not in self.bomb_position and variable not in self.nobomb_position):
+                non_trivials_constrained_var.append(variable)
+        return self.constraints, non_trivials_constrained_var
