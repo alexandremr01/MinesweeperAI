@@ -9,7 +9,7 @@ class MinesweeperCore:
     UNKNOWN_CELL = -1
     CLEAR_CELL = 0
 
-    def __init__(self, height, width, num_bombs, win_threshold):
+    def __init__(self, height, width, num_bombs, win_threshold=0.8):
       """
       Basic game configuration and call board initializer.
       """
@@ -96,3 +96,4 @@ class MinesweeperCore:
         for position in self.bomb_positions:
           xray_table[position[0], position[1]] = self.BOMB
         return xray_table
+        
