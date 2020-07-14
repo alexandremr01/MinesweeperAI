@@ -1,4 +1,5 @@
 from minesweeper import MinesweeperCore
+import numpy as np
 
 class MinesweeperConstraint:
     """
@@ -125,6 +126,7 @@ class MinesweeperAgent:
         self.constraints = []
         self.nobomb_position = [self.initial_position]
         self.bomb_position = []
+        self.unknown_position = []
 
     def reset(self):
         """
@@ -134,6 +136,7 @@ class MinesweeperAgent:
         self.constraints = []
         self.nobomb_position = [self.initial_position]
         self.bomb_position = []
+        self.unknown_position = []
 
     def act(self, board):
         """
@@ -161,6 +164,10 @@ class MinesweeperAgent:
             if(probabilities[variable][2] > best_position[1] and variable not in self.bomb_position):
                 best_position[1] = probabilities[variable][2]
                 best_position[0] = variable
+        if(best_position[1] == 0):
+            playable_positions = [position for position in self.unknown_position if position not in self.bomb_position]
+            rand_index = np.random.randint(len(playable_positions))
+            best_position[0] = playable_positions[rand_index]
         return best_position[0]
 
     def solve_coupled_constraints(self, coupled_constraints):
@@ -216,7 +223,9 @@ class MinesweeperAgent:
         value = None
         constraint = None
         # Corner constraints
-        if(board[0, 0] > 0):
+        if(board[0, 0] == MinesweeperCore.UNKNOWN_CELL):
+            self.unknown_position.append((0, 0))
+        elif(board[0, 0] > 0):
             variables = []
             positions = [(0,1), (1,0), (1,1)]
             for variable in positions:
@@ -226,7 +235,9 @@ class MinesweeperAgent:
             value = board[0, 0]
             constraint = MinesweeperConstraint(variables, value)
             self.constraints.append(constraint)
-        if(board[0, width-1] > 0):
+        if(board[0, width-1] == MinesweeperCore.UNKNOWN_CELL):
+            self.unknown_position.append((0, width-1))
+        elif(board[0, width-1] > 0):
             variables = []
             positions = [(0,width-2), (1,width-1), (1,width-2)]
             for variable in positions:
@@ -236,7 +247,9 @@ class MinesweeperAgent:
             value = board[0, width-1]
             constraint = MinesweeperConstraint(variables, value)
             self.constraints.append(constraint)
-        if(board[height-1, 0] > 0):
+        if(board[height-1, 0] == MinesweeperCore.UNKNOWN_CELL):
+            self.unknown_position.append((height-1, 0))
+        elif(board[height-1, 0] > 0):
             variables = []
             positions = [(height-2,0), (height-2,1), (height-1,1)]
             for variable in positions:
@@ -246,7 +259,9 @@ class MinesweeperAgent:
             value = board[height-1, 0]
             constraint = MinesweeperConstraint(variables, value)
             self.constraints.append(constraint)
-        if(board[height-1, width-1] > 0):
+        if(board[height-1,width-1] == MinesweeperCore.UNKNOWN_CELL):
+            self.unknown_position.append((height-1, width-1))
+        elif(board[height-1, width-1] > 0):
             variables = []
             positions = [(height-2,width-1), (height-2,width-2), (height-1,width-2)]
             for variable in positions:
@@ -258,7 +273,9 @@ class MinesweeperAgent:
             self.constraints.append(constraint)
         # Edges constraints
         for i in range(width - 2):
-            if(board[0, i+1] > 0):
+            if(board[0, i+1] == MinesweeperCore.UNKNOWN_CELL):
+                self.unknown_position.append((0, i+1))
+            elif(board[0, i+1] > 0):
                 variables = []
                 positions = [(0, i), (0, i+2), (1, i), (1, i+1), (1, i+2)]
                 for variable in positions:
@@ -268,7 +285,9 @@ class MinesweeperAgent:
                 value = board[0, i+1]
                 constraint = MinesweeperConstraint(variables, value)
                 self.constraints.append(constraint)
-            if(board[height-1, i+1] > 0):
+            if(board[height-1, i+1] == MinesweeperCore.UNKNOWN_CELL):
+                self.unknown_position.append((height-1, i+1))
+            elif(board[height-1, i+1] > 0):
                 variables = []
                 positions = [(height-1, i), (height-1, i+2), (height-2, i), (height-2, i+1), (height-2, i+2)]
                 for variable in positions:
@@ -278,7 +297,9 @@ class MinesweeperAgent:
                 value = board[height-1, i+1]
                 constraint = MinesweeperConstraint(variables, value)
                 self.constraints.append(constraint)
-            if(board[i+1, 0] > 0):
+            if(board[i+1, 0] == MinesweeperCore.UNKNOWN_CELL):
+                self.unknown_position.append((i+1, 0))
+            elif(board[i+1, 0] > 0):
                 variables = []
                 positions = [(i, 0), (i+2, 0), (i, 1), (i+1, 1), (i+2, 1)]
                 for variable in positions:
@@ -288,7 +309,9 @@ class MinesweeperAgent:
                 value = board[i+1, 0]
                 constraint = MinesweeperConstraint(variables, value)
                 self.constraints.append(constraint)
-            if(board[i+1, height-1] > 0):
+            if(board[i+1, height-1] == MinesweeperCore.UNKNOWN_CELL):
+                self.unknown_position.append((i+1, height-1))
+            elif(board[i+1, height-1] > 0):
                 variables = []
                 positions = [(i, height-1), (i+2, height-1), (i, height-2), (i+1, height-2), (i+2, height-2)]
                 for variable in positions:
@@ -301,6 +324,8 @@ class MinesweeperAgent:
         # Constraints inside the board
         for i in range(width - 2):
             for j in range(height - 2):
+                if(board[i+1, j+1] == MinesweeperCore.UNKNOWN_CELL):
+                    self.unknown_position.append((i+1, j+1))
                 if(board[i+1, j+1] > 0):
                     variables = []
                     positions = [(i+1, j), (i+1, j+2), (i, j), (i, j+1), (i, j+2), (i+2, j), (i+2, j+1), (i+2, j+2)]
