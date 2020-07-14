@@ -13,8 +13,8 @@ fig_format = 'png'  # Format used for saving matplotlib's figures
 os.environ['CUDA_VISIBLE_DEVICES'] = '-1'
 
 # Initiating the environment
-side = 9
-bombs = 10
+side = 6
+bombs = 7
 minesweeper = MinesweeperEnvironment(side, side, bombs)
 
 # Creating the DQN agent
@@ -27,22 +27,22 @@ if os.path.exists('minesweeper.h5'):
 else:
     print('No weights found from previous learning session.')
 done = False
-batch_size = 16  # batch size used for the experience replay
+batch_size = 32  # batch size used for the experience replay
 return_history = []
 
-out_file = open('log', 'w')
+#out_file = open('log', 'w')
 
 for episodes in range(1, NUM_EPISODES + 1):
     # Reset the environment
     state = minesweeper.reset()
     # Cumulative reward is the return since the beginning of the episode
     cumulative_reward = 0.0
-    moves = []
+    #moves = []
     for plays in range(1, 500):
         # Select action
         x, y = agent.act(state)
         action = (x, y)
-        moves.append(action)
+        #moves.append(action)
         next_state, reward, done = minesweeper.step(x, y)
         #minesweeper.print_board()
         #print(reward)
@@ -54,8 +54,8 @@ for episodes in range(1, NUM_EPISODES + 1):
         # Accumulate reward
         cumulative_reward = agent.gamma * cumulative_reward + reward
         if done:
-            out_file.write(str(minesweeper.game.bomb_positions))
-            out_file.write(str(moves))
+            #out_file.write(str(minesweeper.game.bomb_positions)+'\n')
+            #out_file.write(str(moves)+'\n')
             print("episode: {}/{}, plays: {}, score: {:.6}, epsilon: {:.3}"
                   .format(episodes, NUM_EPISODES, plays, cumulative_reward, agent.epsilon))
             break

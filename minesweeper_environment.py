@@ -5,7 +5,7 @@ class MinesweeperEnvironment:
     """
     Reinforcement Learning wrapper to the core game.
     """
-    def __init__(self, height, width, num_bombs, win_threshold = 0.8):
+    def __init__(self, height, width, num_bombs, win_threshold = 1.0):
       self.height = height
       self.width = width
       self.num_bombs = num_bombs
@@ -15,13 +15,10 @@ class MinesweeperEnvironment:
       return self.game.reset()
     
     def reward_engineering(self):
-      reward = 0
       if not self.is_finished():
-        reward = 1
-      elif self.is_victory():
-        open_table = self.game.table != self.game.UNKNOWN_CELL
-        reward = np.sum(open_table)
-      return reward
+        return 10
+      elif not self.is_victory():
+        return -10
 
     def step(self, x, y):
       self.game.play(x, y)
