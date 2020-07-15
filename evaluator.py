@@ -4,7 +4,7 @@ from minesweeper_environment import MinesweeperEnvironment
 from minesweeper import MinesweeperCore
 from csp import MinesweeperAgent
 import matplotlib.pyplot as plt
-from dqn_agent import DQNAgent
+#from dqn_agent import DQNAgent
 import os
 
 # This script runs an actor and evaluate it.

@@ -5,7 +5,7 @@ class MinesweeperEnvironment:
     """
     Reinforcement Learning wrapper to the core game.
     """
-    def __init__(self, height, width, num_bombs, win_threshold = 0.8):
+    def __init__(self, height, width, num_bombs, win_threshold = 1.0):
       self.height = height
       self.width = width
       self.num_bombs = num_bombs
