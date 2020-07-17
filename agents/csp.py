@@ -144,22 +144,52 @@ class MinesweeperAgent:
 
         :type board: numpy matrix.
         """
+#        if(len(self.bomb_position) == self.num_bombs): # Game ends
+#            print("ganhou o jogo !!")
         if(len(self.nobomb_position) != 0):
             return self.nobomb_position.pop(0)
         constraints, constrained_variables = self.read_board(board)
+        if(len(self.nobomb_position) != 0):
+            return self.nobomb_position.pop(0)
+        if(len(self.bomb_position) == self.num_bombs):
+            for position in self.unknown_position:
+                if(position not in self.bomb_position):
+                    self.nobomb_position.append(position)
+            return self.nobomb_position.pop(0)
+#        print(" -- começo --")
+#        for constraint in constraints:
+#            print("\nConstraint:", constraint.variables)
+#            print("Value: ", constraint.value)
         coupled_constraints = self.generate_coupled_constraints(constraints, constrained_variables)
+#        for couple in coupled_constraints:
+#            print("\nNew Couple")
+#            for constraint in couple:
+#                print("Constraint:", constraint.variables)
+#                print("Value: ", constraint.value)
         answers = self.solve_coupled_constraints(coupled_constraints)
         probabilities = {} # Variables as keys, [All cases, Cases of 0, Probability to be 0]
+#        print("Nobomb_position:", self.nobomb_position, "bomb_position:", self.bomb_position)
+#        print("Constrained variables:", constrained_variables)
+#        print("-- meio --")
+#        print("Constrained Vars\n", constrained_variables)
         for variable in constrained_variables:
             probabilities[variable] = [0, 0, 0]
+#        print("num_bombs", self.num_bombs)
+#        print("len bomb_position:\n", len(self.bomb_position), "bomb_position", self.bomb_position)
+#        print("anwsers", answers)
         for ans in answers:
             for solution in ans:
+#                print("\nSolution:", solution)
                 for variable in solution:
                     probabilities[variable][0] = probabilities[variable][0] + 1
                     if(solution[variable] == 0):
                         probabilities[variable][1] = probabilities[variable][1] + 1
+
+#        print(probabilities)
         best_position = [(0, 0), 0]
         for variable in constrained_variables:
+#            if(probabilities[variable][0] == 0):
+#                print(variable, "ERRO AQUI!!")
             probabilities[variable][2] = probabilities[variable][1] / probabilities[variable][0]
             if(probabilities[variable][2] > best_position[1] and variable not in self.bomb_position):
                 best_position[1] = probabilities[variable][2]
@@ -216,6 +246,7 @@ class MinesweeperAgent:
         :type board: numpy matrix
         """
         self.constraints = []
+        self.unknown_position = []
         constrained_var = set()
         height = board.shape[0]
         width = board.shape[1]
@@ -337,38 +368,110 @@ class MinesweeperAgent:
                     constraint = MinesweeperConstraint(variables, value)
                     self.constraints.append(constraint)
         # Simplifies constraints
+#        for constraint in self.constraints:
+#            print("\nConstraint no read", constraint.variables)
+#            print("Value:", constraint.value)
+#        print("-----------------------------------------\n")
         has_subset = True
-        while(has_subset == True):
-            has_subset = False
+        has_simplified_version = True
+        while(has_simplified_version == True):
+            has_simplified_version = False
+#            print("has_subset:", has_subset, "has_simplified_version\n", has_simplified_version)
+            while(has_subset == True):
+                has_subset = False
+                for i in range(len(self.constraints)):
+                    j = i + 1
+                    while(j < len(self.constraints)):
+                        if(set(self.constraints[i].variables).issubset(set(self.constraints[j].variables))):
+                            has_subset = True
+                            variables = [var for var in self.constraints[j].variables if var not in self.constraints[i].variables]
+                            value = self.constraints[j].value - self.constraints[i].value
+                            self.constraints[j].variables = variables
+                            self.constraints[j].value = value
+                        if(set(self.constraints[j].variables).issubset(set(self.constraints[i].variables))):
+                            has_subset = True
+                            variables = [var for var in self.constraints[i].variables if var not in self.constraints[j].variables]
+                            value = self.constraints[i].value - self.constraints[j].value
+                            self.constraints[i].variables = variables
+                            self.constraints[i].value = value
+                        j = j + 1
+                constraints = [constraint for constraint in self.constraints if constraint.variables != []]
+                self.constraints = constraints
+            for position in self.nobomb_position:
+                for constraint in self.constraints:
+                    if(position in constraint.variables):
+                        has_simplified_version = True
+                        constraint.variables.remove(position)
+            for position in self.bomb_position:
+                for constraint in self.constraints:
+                    if(position in constraint.variables):
+                        has_simplified_version = True
+                        constraint.variables.remove(position)
+                        constraint.value = constraint.value - 1
+            constraints = [constraint for constraint in self.constraints if constraint.variables != []]
+            self.constraints = constraints
+        #    for i in range(len(self.constraints)):
+                #for constraint in self.constraints:
+                #    print("\nConstraint no read", constraint.variables)
+                #    print("Value:", constraint.value)
+                #print("-----------------------------------------\n")
+        #        j = i + 1
+        #        while(j < len(self.constraints)):
+                    #print("j", j)
+        #            if(set(self.constraints[i].variables).issubset(set(self.constraints[j].variables))):
+        #                has_subset = True
+        #                has_simplified_version = True
+        #            if(set(self.constraints[j].variables).issubset(set(self.constraints[i].variables))):
+        #                has_simplified_version = True
+        #            j = j + 1
+            # Finds trivials constraints
+#            for constraint in self.constraints:
+#                print("\nConstraint no read", constraint.variables)
+#                print("Value:", constraint.value)
+#            print("-----------------------------------------\n")
+            index_to_remove = []
+            for i in range(len(self.constraints)):
+                if(self.constraints[i].value == 0):
+                    has_simplified_version = True
+                    index_to_remove.append(i)
+                    for variable in self.constraints[i].variables:
+                        if(variable not in self.nobomb_position):
+                            self.nobomb_position.append(variable)
+                elif(self.constraints[i].value == len(self.constraints[i].variables)):
+                    has_simplified_version = True
+                    index_to_remove.append(i)
+                    for variable in self.constraints[i].variables:
+                        if(variable not in self.bomb_position):
+                            self.bomb_position.append(variable)
             for i in range(len(self.constraints)):
                 j = i + 1
                 while(j < len(self.constraints)):
+                    #print("j", j)
                     if(set(self.constraints[i].variables).issubset(set(self.constraints[j].variables))):
                         has_subset = True
-                        variables = [var for var in self.constraints[j].variables if var not in self.constraints[i].variables]
-                        value = self.constraints[j].value - self.constraints[i].value
-                        self.constraints[j].variables = variables
-                        self.constraints[j].value = value
+                        has_simplified_version = True
                     if(set(self.constraints[j].variables).issubset(set(self.constraints[i].variables))):
                         has_subset = True
-                        variables = [var for var in self.constraints[i].variables if var not in self.constraints[j].variables]
-                        value = self.constraints[i].value - self.constraints[j].value
-                        self.constraints[i].variables = variables
-                        self.constraints[i].value = value
+                        has_simplified_version = True
                     j = j + 1
-            constraints = [constraint for constraint in self.constraints if constraint.variables != []]
+            #print(index_to_remove)
+            constraints = []
+            for index in range(len(self.constraints)):
+                if(index not in index_to_remove):
+                    constraints.append(self.constraints[index])
             self.constraints = constraints
-        # Finds trivials constraints
-        for constraint in self.constraints:
-            if(len(constraint.variables) == 1):
-                if(constraint.value == 0):
-                    self.nobomb_position.append(constraint.variables[0])
-                elif(constraint.variables[0] not in self.bomb_position):
-                    self.bomb_position.append(constraint.variables[0])
-                self.constraints.remove(constraint)
+#            for constraint in self.constraints:
+#                print("\nApós trivial", constraint.variables)
+#                print("Value:", constraint.value)
+#            print("-----------------------------------------\n")
         # Removes trivials contraints from constrained_var
         non_trivials_constrained_var = []
         for variable in constrained_var:
             if(variable not in self.bomb_position and variable not in self.nobomb_position):
                 non_trivials_constrained_var.append(variable)
+#        for constraint in self.constraints:
+#            print("\nConstraint no read", constraint.variables)
+#            print("Value:", constraint.value)
+#        print("-----------------------------------------\n")
+#        print("Len", len(self.constraints))
         return self.constraints, non_trivials_constrained_var
