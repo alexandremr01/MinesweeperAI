@@ -100,6 +100,8 @@ class CSPSolver:
         for variable in self.variables:
             if variable not in assignment:
                 unassigned.append(variable)
+        #print("Unassigned:", unassigned, "\n")
+        #print("Len assignment:", len(assignment), "Len variable:", len(self.variables), "\n")
         first = unassigned[0]
         for value in self.domains:
             local_assignment = assignment.copy()
@@ -160,13 +162,24 @@ class MinesweeperAgent:
 #        for constraint in constraints:
 #            print("\nConstraint:", constraint.variables)
 #            print("Value: ", constraint.value)
-        coupled_constraints = self.generate_coupled_constraints(constraints, constrained_variables)
+#1807        coupled_constraints = self.generate_coupled_constraints(constraints, constrained_variables)
 #        for couple in coupled_constraints:
 #            print("\nNew Couple")
 #            for constraint in couple:
 #                print("Constraint:", constraint.variables)
 #                print("Value: ", constraint.value)
-        answers = self.solve_coupled_constraints(coupled_constraints)
+#1807        answers = self.solve_coupled_constraints(coupled_constraints)
+        csp = CSPSolver(constrained_variables)
+        for constraint in constraints:
+            csp.add_constraint(constraint)
+        csp.backtracking_search()
+        answers = csp.get_solutions()
+    #    for ans in answers:
+    #        print("ans:", ans, "\n")
+    #        for variable in ans:
+    #            print("variable: ", ans[variable])
+    #        print("\n")
+    #    print("constrained variables", constrained_variables)
         probabilities = {} # Variables as keys, [All cases, Cases of 0, Probability to be 0]
 #        print("Nobomb_position:", self.nobomb_position, "bomb_position:", self.bomb_position)
 #        print("Constrained variables:", constrained_variables)
@@ -178,19 +191,22 @@ class MinesweeperAgent:
 #        print("len bomb_position:\n", len(self.bomb_position), "bomb_position", self.bomb_position)
 #        print("anwsers", answers)
         for ans in answers:
-            for solution in ans:
+            #for solution in ans:
 #                print("\nSolution:", solution)
-                for variable in solution:
+                for variable in ans:
                     probabilities[variable][0] = probabilities[variable][0] + 1
-                    if(solution[variable] == 0):
+                    if(ans[variable] == 0):
                         probabilities[variable][1] = probabilities[variable][1] + 1
-
+#        for ans in answers:
+#            print("\nAns:", ans)
+#        print("Constrained Variables:", constrained_variables)
 #        print(probabilities)
         best_position = [(0, 0), 0]
         for variable in constrained_variables:
 #            if(probabilities[variable][0] == 0):
 #                print(variable, "ERRO AQUI!!")
-            probabilities[variable][2] = probabilities[variable][1] / probabilities[variable][0]
+            if(probabilities[variable][0] != 0):
+                probabilities[variable][2] = probabilities[variable][1] / probabilities[variable][0]
             if(probabilities[variable][2] > best_position[1] and variable not in self.bomb_position):
                 best_position[1] = probabilities[variable][2]
                 best_position[0] = variable
@@ -232,11 +248,11 @@ class MinesweeperAgent:
             for constraint in constraints:
                 if variable in constraint.variables:
                     list.append(constraint)
-            sum_bombs = 0
-            for constraint in list:
-                sum_bombs = sum_bombs + constraint.value
-            if(sum_bombs <= self.num_bombs - len(self.bomb_position)):
-                coupled_constraints.append(list)
+        #20:24   sum_bombs = 0
+        #20:24    for constraint in list:
+        #20:24       sum_bombs = sum_bombs + constraint.value
+        #20:24    if(sum_bombs <= self.num_bombs - len(self.bomb_position)):
+            coupled_constraints.append(list)
         return coupled_constraints
 
     def read_board(self, board):
