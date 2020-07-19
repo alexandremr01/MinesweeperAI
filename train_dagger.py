@@ -24,7 +24,9 @@ def sample_trajectories(n, game, actor):
     for k in range(0, n):
         state = game.get_state()
         X = np.concatenate([X, np.copy(game.get_state()).reshape(1, state.shape[0], state.shape[1]) ])
-        print(game.get_state())
+        #print(game.get_state())
+        #print("Salvos: ")
+        #print(X)
         i, j = actor.act(state)
         next_state, reward, done = game.step(i, j)
         vector = np.zeros((m*m, 1))
@@ -59,11 +61,12 @@ return_history = []
 
 tensorboard = TensorBoard(log_dir="logs\\{}".format(time()))
 
-NUM_EPISODES = 1000
+NUM_EPISODES = 5
+steps_per_episode = 1000
 
-dataset_X, dataset_Y = sample_trajectories(1000, minesweeper, teacher)
+dataset_X, dataset_Y = sample_trajectories(steps_per_episode, minesweeper, teacher)
 for episodes in range(1, NUM_EPISODES + 1):
-    new_X, new_Y = sample_trajectories(1000, minesweeper, teacher)
+    new_X, new_Y = sample_trajectories(steps_per_episode, minesweeper, teacher)
     dataset_X = np.concatenate([dataset_X, new_X], axis=0)
     dataset_Y = np.concatenate([dataset_Y, new_Y], axis=1)
     print(dataset_X.shape)
@@ -71,4 +74,6 @@ for episodes in range(1, NUM_EPISODES + 1):
     nn_output = dataset_Y.reshape(-1, side*side)
     agent.model.fit(nn_input, nn_output, epochs = 30, callbacks=[tensorboard], shuffle = True, batch_size = batch_size)
     agent.save(weights_filename)
+    np.save('dataset_X', dataset_X)
+    np.save('dataset_Y', dataset_Y)
     print(len(dataset_X))

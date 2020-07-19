@@ -41,7 +41,7 @@ class MinesweeperEnvironment:
 
     def get_open_percentage(self):
       open_table = self.game.table != self.game.UNKNOWN_CELL
-      return np.sum(open_table) / (self.height * self.width)
+      return np.sum(open_table) / (self.height * self.width - self.num_bombs)
 
     def print_board(self, xray = False):
       print_table = self.game.get_board(xray)
