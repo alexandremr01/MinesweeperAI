@@ -4,7 +4,7 @@ from minesweeper_environment import MinesweeperEnvironment
 from minesweeper import MinesweeperCore
 import matplotlib.pyplot as plt
 import os
-from csp import MinesweeperAgent
+from agents.csp import MinesweeperAgent
 
 
 

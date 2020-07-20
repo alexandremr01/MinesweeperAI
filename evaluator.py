@@ -2,9 +2,9 @@ import numpy as np
 import random
 from minesweeper_environment import MinesweeperEnvironment
 from minesweeper import MinesweeperCore
-#from csp import MinesweeperAgent
+#from agents.csp import MinesweeperAgent
 import matplotlib.pyplot as plt
-#from dqn_agent import DQNAgent
+#from agents.dqn_agent import DQNAgent
 import os
 from agents.L4MSAgent import L4MSAgent
 

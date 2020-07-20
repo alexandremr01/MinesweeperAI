@@ -1,7 +1,7 @@
 import os
 import numpy as np
 import matplotlib.pyplot as plt
-from dqn_agent import DQNAgent
+from agents.dqn_agent import DQNAgent
 import pylab
 from minesweeper import MinesweeperCore
 from minesweeper_environment import MinesweeperEnvironment

@@ -1,6 +1,6 @@
 from minesweeper_environment import MinesweeperEnvironment
 from minesweeper import MinesweeperCore
-from csp import MinesweeperAgent
+from agents.csp import MinesweeperAgent
 import numpy as np
 
 size = 8

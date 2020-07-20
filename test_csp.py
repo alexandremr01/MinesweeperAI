@@ -1,4 +1,4 @@
-from csp import MinesweeperConstraint, MinesweeperCSP
+from agents.csp import MinesweeperConstraint, MinesweeperCSP
 
 constrained_variables = [(0,1), (0,2), (0,3), (0,4)]
 constraint_1 = MinesweeperConstraint([(0,1), (0,2)], 1)
