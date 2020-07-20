@@ -34,6 +34,8 @@ for k in range(1, dataset_size+1):
     if k % batch_size == 0:
         np.save(folder_name+'/dataset_X_'+str(batch), X[1:])
         np.save(folder_name+'/dataset_Y_'+str(batch), Y[:, 1:])
+        X = np.array([minesweeper.get_state()])
+        Y = np.array(np.zeros((side*side,1)))
         batch += 1
     if done:
         minesweeper.reset()
