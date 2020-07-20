@@ -48,18 +48,12 @@ class CSPSolver:
         """
         self.variables = variables
         self.domains = [0, 1]
-        self.constraints = constraints
+        self.constraints = {}
         self.solutions = []
         for variable in self.variables:
             self.constraints[variable] = []
-
-    def add_variable(self, variable):
-        """
-        Adds a variable
-
-        """
-        self.variable.append(variable)
-        self.constraints[variable] = []
+        for constraint in constraints:
+            self.add_constraint(constraint)
 
     def add_constraint(self, constraint):
         """
@@ -100,8 +94,6 @@ class CSPSolver:
         for variable in self.variables:
             if variable not in assignment:
                 unassigned.append(variable)
-        #print("Unassigned:", unassigned, "\n")
-        #print("Len assignment:", len(assignment), "Len variable:", len(self.variables), "\n")
         first = unassigned[0]
         for value in self.domains:
             local_assignment = assignment.copy()
@@ -110,11 +102,12 @@ class CSPSolver:
                 result = self.backtracking_search(local_assignment)
         return None
 
-    def get_solutions(self):
+    def get_answers(self):
         """
-        Returns the solutions
+        Runs backtracking search and returns solutions.
 
         """
+        self.backtracking_search()
         return self.solutions
 
 
@@ -124,6 +117,7 @@ class MinesweeperAgent:
     """
     def __init__(self, size, num_bombs):
         self.initial_position = (int(size/2), int(size/2))
+        self.board_size = size
         self.num_bombs = num_bombs
         self.constraints = []
         self.nobomb_position = [self.initial_position]
@@ -146,8 +140,6 @@ class MinesweeperAgent:
 
         :type board: numpy matrix.
         """
-#        if(len(self.bomb_position) == self.num_bombs): # Game ends
-#            print("ganhou o jogo !!")
         if(len(self.nobomb_position) != 0):
             return self.nobomb_position.pop(0)
         constraints, constrained_variables = self.read_board(board)
@@ -158,53 +150,24 @@ class MinesweeperAgent:
                 if(position not in self.bomb_position):
                     self.nobomb_position.append(position)
             return self.nobomb_position.pop(0)
-#        print(" -- começo --")
-#        for constraint in constraints:
-#            print("\nConstraint:", constraint.variables)
-#            print("Value: ", constraint.value)
-#1807        coupled_constraints = self.generate_coupled_constraints(constraints, constrained_variables)
-#        for couple in coupled_constraints:
-#            print("\nNew Couple")
-#            for constraint in couple:
-#                print("Constraint:", constraint.variables)
-#                print("Value: ", constraint.value)
-#1807        answers = self.solve_coupled_constraints(coupled_constraints)
-        csp = CSPSolver(constrained_variables)
-        for constraint in constraints:
-            csp.add_constraint(constraint)
-        csp.backtracking_search()
-        answers = csp.get_solutions()
-    #    for ans in answers:
-    #        print("ans:", ans, "\n")
-    #        for variable in ans:
-    #            print("variable: ", ans[variable])
-    #        print("\n")
-    #    print("constrained variables", constrained_variables)
+        csp = CSPSolver(constrained_variables, constraints)
+        answers = csp.get_answers()
+        # Corner heuristic # # #
+        corner_position = [(0, 0), (self.board_size - 1, self.board_size - 1), (0, self.board_size - 1), (self.board_size - 1, 0)]
+        for position in corner_position:
+            if(position not in self.bomb_position and position in self.unknown_position):
+                return position
+        # # # # # # # # # # # # #
         probabilities = {} # Variables as keys, [All cases, Cases of 0, Probability to be 0]
-#        print("Nobomb_position:", self.nobomb_position, "bomb_position:", self.bomb_position)
-#        print("Constrained variables:", constrained_variables)
-#        print("-- meio --")
-#        print("Constrained Vars\n", constrained_variables)
         for variable in constrained_variables:
             probabilities[variable] = [0, 0, 0]
-#        print("num_bombs", self.num_bombs)
-#        print("len bomb_position:\n", len(self.bomb_position), "bomb_position", self.bomb_position)
-#        print("anwsers", answers)
         for ans in answers:
-            #for solution in ans:
-#                print("\nSolution:", solution)
                 for variable in ans:
                     probabilities[variable][0] = probabilities[variable][0] + 1
                     if(ans[variable] == 0):
                         probabilities[variable][1] = probabilities[variable][1] + 1
-#        for ans in answers:
-#            print("\nAns:", ans)
-#        print("Constrained Variables:", constrained_variables)
-#        print(probabilities)
         best_position = [(0, 0), 0]
         for variable in constrained_variables:
-#            if(probabilities[variable][0] == 0):
-#                print(variable, "ERRO AQUI!!")
             if(probabilities[variable][0] != 0):
                 probabilities[variable][2] = probabilities[variable][1] / probabilities[variable][0]
             if(probabilities[variable][2] > best_position[1] and variable not in self.bomb_position):
@@ -215,45 +178,6 @@ class MinesweeperAgent:
             rand_index = np.random.randint(len(playable_positions))
             best_position[0] = playable_positions[rand_index]
         return best_position[0]
-
-    def solve_coupled_constraints(self, coupled_constraints):
-        """
-        Solves coupled constraints
-
-        """
-        variables = []
-        answer = []
-        for constraint_set in coupled_constraints:
-            variables = []
-            for constraint in constraint_set:
-                variables = variables + constraint.variables
-            variables = set(variables)
-            variables = list(variables)
-            solver = CSPSolver(variables)
-            for constraint in constraint_set:
-                solver.add_constraint(constraint)
-            solver.backtracking_search()
-            solutions = solver.get_solutions()
-            answer.append(solutions)
-        return answer
-
-    def generate_coupled_constraints(self, constraints, variables):
-        """
-        Returns all coupled sets of constraints.
-
-        """
-        coupled_constraints = []
-        for variable in variables:
-            list = []
-            for constraint in constraints:
-                if variable in constraint.variables:
-                    list.append(constraint)
-        #20:24   sum_bombs = 0
-        #20:24    for constraint in list:
-        #20:24       sum_bombs = sum_bombs + constraint.value
-        #20:24    if(sum_bombs <= self.num_bombs - len(self.bomb_position)):
-            coupled_constraints.append(list)
-        return coupled_constraints
 
     def read_board(self, board):
         """
@@ -384,15 +308,10 @@ class MinesweeperAgent:
                     constraint = MinesweeperConstraint(variables, value)
                     self.constraints.append(constraint)
         # Simplifies constraints
-#        for constraint in self.constraints:
-#            print("\nConstraint no read", constraint.variables)
-#            print("Value:", constraint.value)
-#        print("-----------------------------------------\n")
         has_subset = True
         has_simplified_version = True
         while(has_simplified_version == True):
             has_simplified_version = False
-#            print("has_subset:", has_subset, "has_simplified_version\n", has_simplified_version)
             while(has_subset == True):
                 has_subset = False
                 for i in range(len(self.constraints)):
@@ -426,25 +345,6 @@ class MinesweeperAgent:
                         constraint.value = constraint.value - 1
             constraints = [constraint for constraint in self.constraints if constraint.variables != []]
             self.constraints = constraints
-        #    for i in range(len(self.constraints)):
-                #for constraint in self.constraints:
-                #    print("\nConstraint no read", constraint.variables)
-                #    print("Value:", constraint.value)
-                #print("-----------------------------------------\n")
-        #        j = i + 1
-        #        while(j < len(self.constraints)):
-                    #print("j", j)
-        #            if(set(self.constraints[i].variables).issubset(set(self.constraints[j].variables))):
-        #                has_subset = True
-        #                has_simplified_version = True
-        #            if(set(self.constraints[j].variables).issubset(set(self.constraints[i].variables))):
-        #                has_simplified_version = True
-        #            j = j + 1
-            # Finds trivials constraints
-#            for constraint in self.constraints:
-#                print("\nConstraint no read", constraint.variables)
-#                print("Value:", constraint.value)
-#            print("-----------------------------------------\n")
             index_to_remove = []
             for i in range(len(self.constraints)):
                 if(self.constraints[i].value == 0):
@@ -462,7 +362,6 @@ class MinesweeperAgent:
             for i in range(len(self.constraints)):
                 j = i + 1
                 while(j < len(self.constraints)):
-                    #print("j", j)
                     if(set(self.constraints[i].variables).issubset(set(self.constraints[j].variables))):
                         has_subset = True
                         has_simplified_version = True
@@ -470,24 +369,14 @@ class MinesweeperAgent:
                         has_subset = True
                         has_simplified_version = True
                     j = j + 1
-            #print(index_to_remove)
             constraints = []
             for index in range(len(self.constraints)):
                 if(index not in index_to_remove):
                     constraints.append(self.constraints[index])
             self.constraints = constraints
-#            for constraint in self.constraints:
-#                print("\nApós trivial", constraint.variables)
-#                print("Value:", constraint.value)
-#            print("-----------------------------------------\n")
         # Removes trivials contraints from constrained_var
         non_trivials_constrained_var = []
         for variable in constrained_var:
             if(variable not in self.bomb_position and variable not in self.nobomb_position):
                 non_trivials_constrained_var.append(variable)
-#        for constraint in self.constraints:
-#            print("\nConstraint no read", constraint.variables)
-#            print("Value:", constraint.value)
-#        print("-----------------------------------------\n")
-#        print("Len", len(self.constraints))
         return self.constraints, non_trivials_constrained_var
