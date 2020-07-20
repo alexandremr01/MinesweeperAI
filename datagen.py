@@ -16,7 +16,7 @@ bombs = 10
 actor = MinesweeperAgent(side, bombs)
 minesweeper = MinesweeperEnvironment(side, side, bombs)
 
-batch = len([name for name in os.listdir(folder_name) if os.path.isfile(os.path.join(folder_name, name))])  # number of already existent dataset files
+batch = len([name for name in os.listdir(folder_name) if os.path.isfile(os.path.join(folder_name, name))]) / 2  # number of already existent dataset files
 
 X = np.array([minesweeper.get_state()])
 Y = np.array(np.zeros((side*side,1)))
