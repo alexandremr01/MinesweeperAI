@@ -100,7 +100,7 @@ class L4MSAgent:
         """
         input_state = self.adjust_shape(state)
         output = self.model.predict(input_state)
-        print(output)
+        #print(output)
         while True:
             index = np.argmax(output)
             i = index // self.side

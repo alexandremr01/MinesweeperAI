@@ -2,10 +2,11 @@ import numpy as np
 import random
 from minesweeper_environment import MinesweeperEnvironment
 from minesweeper import MinesweeperCore
-from csp import MinesweeperAgent
+#from csp import MinesweeperAgent
 import matplotlib.pyplot as plt
 #from dqn_agent import DQNAgent
 import os
+from agents.L4MSAgent import L4MSAgent
 
 # This script runs an actor and evaluate it.
 
@@ -20,7 +21,7 @@ def random_actor(state):
 
 
 size = 8
-NUM_EPISODES = 1000
+NUM_EPISODES = 100
 bombs=10
 game = MinesweeperEnvironment(size, size, bombs)
 
@@ -29,17 +30,18 @@ plays_to_die = []
 open_percentage = []
 
 #agent = DQNAgent(size)
-agent = MinesweeperAgent(size,bombs)
+#agent = MinesweeperAgent(size,bombs)
+agent = L4MSAgent(size, bombs)
 
-if os.path.exists('minesweeper.h5'):
+if os.path.exists('best_model.h5'):
     print('Loading weights from previous learning session.')
-    agent.load("minesweeper.h5")
+    agent.load("best_model.h5")
 else:
     print('No weights found from previous learning session.')
 
 for episodes in range(1, NUM_EPISODES + 1):
     state = game.reset()
-    agent.reset()
+    #agent.reset()
     plays = 0
     while game.is_finished() != True:
         #action = random_actor(game.get_state()) # Use this to test random policy

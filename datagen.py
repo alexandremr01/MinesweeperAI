@@ -19,10 +19,10 @@ def adjust_dimension(table, side):
 def sample_trajectories(n, game, actor):
     game.reset()
     m = game.width
-    #X = np.array([game.get_state()])
-    #Y = np.array(np.zeros((m*m,1)))
-    X = np.load('dataset_X.npy')
-    Y = np.load('dataset_Y.npy')
+    X = np.array([game.get_state()])
+    Y = np.array(np.zeros((m*m,1)))
+    #X = np.load('dataset_X.npy')
+    #Y = np.load('dataset_Y.npy')
     for k in range(len(X), n):
         state = game.get_state()
         X = np.concatenate([X, np.copy(game.get_state()).reshape(1, state.shape[0], state.shape[1]) ])
@@ -36,8 +36,8 @@ def sample_trajectories(n, game, actor):
         Y = np.concatenate([Y, vector], axis=1)
         if k % 1000 == 0:
           print('%s thousand done'%(k/1000))
-          np.save('dataset_X', X)
-          np.save('dataset_Y', Y)
+          np.save('dataset_X', X[1:])
+          np.save('dataset_Y', Y[:, 1:])
         if done:
             game.reset()
             actor.reset()
