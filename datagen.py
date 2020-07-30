@@ -7,7 +7,7 @@ import os
 
 #Dataset configuration
 batch_size = 50000 
-dataset_size = 100000
+dataset_size = 5000000
 folder_name = 'dataset'
 
 #Game/Actor Configuration

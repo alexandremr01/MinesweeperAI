@@ -6,7 +6,7 @@ from minesweeper import MinesweeperCore
 import matplotlib.pyplot as plt
 #from agents.dqn_agent import DQNAgent
 import os
-from agents.L4MSAgent import L4MSAgent
+from agents.L6MSAgent import L6MSAgent
 
 # This script runs an actor and evaluate it.
 
@@ -18,6 +18,8 @@ def random_actor(state):
     if state[x, y] == MinesweeperCore.UNKNOWN_CELL:
       break
   return x, y
+
+os.environ['CUDA_VISIBLE_DEVICES'] = '-1'
 
 
 size = 8
@@ -31,11 +33,11 @@ open_percentage = []
 
 #agent = DQNAgent(size)
 #agent = MinesweeperAgent(size,bombs)
-agent = L4MSAgent(size, bombs)
+agent = L6MSAgent(size, bombs)
 
-if os.path.exists('best_model.h5'):
+if os.path.exists('best_model.hdf5'):
     print('Loading weights from previous learning session.')
-    agent.load("best_model.h5")
+    agent.load("best_model.hdf5")
 else:
     print('No weights found from previous learning session.')
 
