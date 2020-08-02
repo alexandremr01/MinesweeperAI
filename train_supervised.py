@@ -45,8 +45,8 @@ validation_generator = ImageDataGenerator().flow(X_validation, y_validation, bat
 
 steps_per_epoch = X_train.shape[0] // BATCH_SIZE
 validation_steps = X_validation.shape[0] // BATCH_SIZE
-#agent.model.load_weights("best_model.hdf5")
-checkpoint = ModelCheckpoint("best_model.hdf5", monitor='loss', verbose=1, save_best_only=True, mode='auto', period=1)
+agent.model.load_weights("best_model.hdf5")
+checkpoint = ModelCheckpoint("best_model.{epoch}.hdf5", monitor='loss', verbose=1, save_best_only=True, mode='auto', period=1)
 #tensorboard = TensorBoard(log_dir="logs")
 agent.model.fit(train_generator, steps_per_epoch=steps_per_epoch, epochs=EPOCHS,
           validation_data=validation_generator, validation_steps=validation_steps,

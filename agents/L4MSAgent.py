@@ -9,6 +9,8 @@ from tensorflow.keras.layers import LeakyReLU, concatenate, Flatten, Dense, ReLU
 from tensorflow.keras.models import Model
 from math import inf
 from minesweeper import MinesweeperCore
+from tensorflow.keras.optimizers import SGD
+
 
 class L4MSAgent:
     """
@@ -84,6 +86,7 @@ class L4MSAgent:
         return model
 
     def adjust_shape(self, table):
+        table = (table+1)/10.0
         table = np.expand_dims(table, axis=0)
         table = np.expand_dims(table, axis=0)
         table = table.reshape(1, self.side, self.side, 1)
