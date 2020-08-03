@@ -14,9 +14,9 @@ from tensorflow.keras.optimizers import SGD
 
 class L4MSAgent:
     """
-    Represents a 4-Layer MineSweeper Agent.
+    Represents a 6-Layer MineSweeper Agent.
     """
-    def __init__(self, side, epsilon=0.5, epsilon_min=0.1, epsilon_decay=0.98, learning_rate=0.001, buffer_size=4098):
+    def __init__(self, side, learning_rate=0.001):
         """
         Creates a Deep Q-Networks (DQN) agent.
 
@@ -38,10 +38,6 @@ class L4MSAgent:
         :type buffer_size: int.
         """
         self.side = side
-        self.replay_buffer = deque(maxlen=buffer_size)  # giving a maximum length makes this buffer forget old memories
-        self.epsilon = epsilon
-        self.epsilon_min = epsilon_min
-        self.epsilon_decay = epsilon_decay
         self.learning_rate = learning_rate
         self.model = self.make_model()
 
@@ -64,12 +60,12 @@ class L4MSAgent:
         layer = ReLU()(layer)
 
         # Layer 2
-        layer = Conv2D(filters=64, kernel_size=(3, 3), strides=(1, 1), padding='same', name='conv_3', use_bias=False)(layer)
+        layer = Conv2D(filters=128, kernel_size=(3, 3), strides=(1, 1), padding='same', name='conv_3', use_bias=False)(layer)
         layer = BatchNormalization(name='norm_3')(layer)
         layer = ReLU()(layer)
 
         # Layer 4
-        layer = Conv2D(filters=64, kernel_size=(3, 3), strides=(1, 1), padding='same', name='conv_4', use_bias=False)(layer)
+        layer = Conv2D(filters=128, kernel_size=(3, 3), strides=(1, 1), padding='same', name='conv_4', use_bias=False)(layer)
         layer = BatchNormalization(name='norm_4')(layer)
         layer = ReLU()(layer)
 
@@ -114,51 +110,6 @@ class L4MSAgent:
                 break
         return i, j
 
-    def append_experience(self, state, action, reward, next_state, done):
-        """
-        Appends a new experience to the replay buffer (and forget an old one if the buffer is full).
-
-        :param state: state.
-        :type state: NumPy array with dimension (1, 2).
-        :param action: action.
-        :type action: int.
-        :param reward: reward.
-        :type reward: float.
-        :param next_state: next state.
-        :type next_state: NumPy array with dimension (1, 2).
-        :param done: if the simulation is over after this experience.
-        :type done: bool.
-        """
-        self.replay_buffer.append((state, action, reward, next_state, done))
-
-    def replay(self, batch_size):
-        """
-        Learns from memorized experience.
-
-        :param batch_size: size of the minibatch taken from the replay buffer.
-        :type batch_size: int.
-        :return: loss computed during the neural network training.
-        :rtype: float.
-        """
-        minibatch = random.sample(self.replay_buffer, batch_size)
-        states, targets = [], []
-        for state, action, reward, next_state, done in minibatch:
-            state = self.adjust_shape(state)
-            next_state = self.adjust_shape(next_state)
-            target = self.model.predict(state)
-            if not done:
-                target[0][action] = reward + self.gamma * np.max(self.model.predict(next_state)[0])
-            else:
-                target[0][action] = reward
-            # Filtering out states and targets for training
-            states.append(state[0])
-            targets.append(target[0])
-        history = self.model.fit(np.array(states), np.array(targets), epochs=1, verbose=0)
-        # Keeping track of loss
-        loss = history.history['loss'][0]
-        return loss
-
-
     def load(self, name):
         """
         Loads the neural network's weights from disk.
@@ -177,10 +128,3 @@ class L4MSAgent:
         """
         self.model.save_weights(name)
 
-    def update_epsilon(self):
-        """
-        Updates the epsilon used for epsilon-greedy action selection.
-        """
-        self.epsilon *= self.epsilon_decay
-        if self.epsilon < self.epsilon_min:
-            self.epsilon = self.epsilon_min

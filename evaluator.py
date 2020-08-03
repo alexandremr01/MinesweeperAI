@@ -5,7 +5,7 @@ from minesweeper import MinesweeperCore
 #from agents.csp import MinesweeperAgent
 import matplotlib.pyplot as plt
 import os
-from agents.L6MSAgent import L6MSAgent
+from agents.L4MSAgent import L4MSAgent
 
 # This script runs an actor and evaluate it.
 from tensorflow.compat.v1 import ConfigProto
@@ -38,8 +38,8 @@ open_percentage = []
 
 #agent = DQNAgent(size)
 #agent = MinesweeperAgent(size,bombs)
-agent = L6MSAgent(size, bombs)
-model = 'models/best_model.14.hdf5'
+agent = L4MSAgent(size, bombs)
+model = 'best_model.hdf5'
 
 if os.path.exists(model):
     print('Loading weights from previous learning session.')
