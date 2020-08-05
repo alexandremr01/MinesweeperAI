@@ -128,3 +128,5 @@ class L4MSAgent:
         """
         self.model.save_weights(name)
 
+    def reset(self):
+        pass

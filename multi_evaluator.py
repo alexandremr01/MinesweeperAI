@@ -5,8 +5,14 @@ from minesweeper import MinesweeperCore
 from agents.csp import MinesweeperAgent
 import matplotlib.pyplot as plt
 import os
-
+from agents.L4MSAgent import L4MSAgent
 # This script runs an actor and evaluate it.
+from tensorflow.compat.v1 import ConfigProto
+from tensorflow.compat.v1 import InteractiveSession
+
+config = ConfigProto()
+config.gpu_options.allow_growth = True
+session = InteractiveSession(config=config)
 
 def random_actor(state):
   size = state.shape[0]
@@ -18,16 +24,18 @@ def random_actor(state):
   return x, y
 
 size = 8
-NUM_EPISODES = 100
-bombs = [8, 12, 16]
+NUM_EPISODES = 10000
+bombs = [8, 10, 12]
 
 victories = 0
 plays_to_die = []
 open_percentage = []
 
-if os.path.exists('minesweeper.h5'):
+agent = L4MSAgent(size)
+weights = 'results/best_model.hdf5'
+if os.path.exists(weights):
     print('Loading weights from previous learning session.')
-    agent.load("minesweeper.h5")
+    agent.load(weights)
 else:
     print('No weights found from previous learning session.')
 
@@ -37,13 +45,13 @@ games_plays_to_die = []
 games_victory_percentage = []
 for current_game in range(num_games):
     game = MinesweeperEnvironment(size, size, bombs[current_game])
-    agent = MinesweeperAgent(size, bombs[current_game])
+    #agent = MinesweeperAgent(size, bombs[current_game])
     victories = 0
     plays_to_die = []
     open_percentage = []
     for episodes in range(1, NUM_EPISODES + 1):
         state = game.reset()
-        agent.reset()
+        #agent.reset()
         plays = 0
         while game.is_finished() != True:
             #action = random_actor(game.get_state()) # Use this to test random policy
@@ -69,8 +77,8 @@ print('Win rate:', bombs[0], 'bombs -', games_victory_percentage[0], '//', bombs
 
 # Plots return history
 plt.hist(games_plays_to_die[0], bins=list(range(0,np.max(np.max(games_plays_to_die)))), label='8 Bombs', alpha=0.6, color='b')
-plt.hist(games_plays_to_die[1], bins=list(range(0,np.max(np.max(games_plays_to_die)))), label='12 Bombs', alpha=0.6, color='darkgreen')
-plt.hist(games_plays_to_die[2], bins=list(range(0,np.max(np.max(games_plays_to_die)))), label='16 Bombs', alpha=0.6, color='r')
+plt.hist(games_plays_to_die[1], bins=list(range(0,np.max(np.max(games_plays_to_die)))), label='10 Bombs', alpha=0.6, color='darkgreen')
+plt.hist(games_plays_to_die[2], bins=list(range(0,np.max(np.max(games_plays_to_die)))), label='12 Bombs', alpha=0.6, color='r')
 plt.legend(loc='upper right')
 plt.xlabel('# plays')
 plt.ylabel('# episodes')
@@ -78,8 +86,8 @@ plt.title('Histogram of number of plays untill defeat')
 plt.show()
 
 plt.hist(games_open_percentage[0], label='8 Bombs', alpha=0.6, color='b')
-plt.hist(games_open_percentage[1], label='12 Bombs', alpha=0.6, color='darkgreen')
-plt.hist(games_open_percentage[2], label='16 Bombs', alpha=0.6, color='r')
+plt.hist(games_open_percentage[1], label='10 Bombs', alpha=0.6, color='darkgreen')
+plt.hist(games_open_percentage[2], label='12 Bombs', alpha=0.6, color='r')
 plt.legend(loc='upper left')
 plt.xlabel('% open')
 plt.ylabel('# episodes')
