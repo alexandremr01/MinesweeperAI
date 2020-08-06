@@ -5,8 +5,14 @@ from minesweeper import MinesweeperCore
 from agents.csp import MinesweeperAgent
 import matplotlib.pyplot as plt
 import os
-
+from agents.L4MSAgent import L4MSAgent
 # This script runs an actor and evaluate it.
+from tensorflow.compat.v1 import ConfigProto
+from tensorflow.compat.v1 import InteractiveSession
+
+config = ConfigProto()
+config.gpu_options.allow_growth = True
+session = InteractiveSession(config=config)
 
 def random_actor(state):
   size = state.shape[0]
@@ -18,16 +24,18 @@ def random_actor(state):
   return x, y
 
 size = 8
-NUM_EPISODES = 10000
+NUM_EPISODES = 100
 bombs = [8, 10, 12]
 
 victories = 0
 plays_to_die = []
 open_percentage = []
 
-if os.path.exists('minesweeper.h5'):
+agent = L4MSAgent(size)
+weights = 'results/best_model.hdf5'
+if os.path.exists(weights):
     print('Loading weights from previous learning session.')
-    agent.load("minesweeper.h5")
+    agent.load(weights)
 else:
     print('No weights found from previous learning session.')
 
