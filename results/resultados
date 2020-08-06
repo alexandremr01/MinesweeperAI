@@ -1,3 +1,6 @@
+Non-heuristic CSP:
+Win rate: 8 bombs - 64.63% // 10 bombs - 53.11% // 12 bombs - 39.93%
+Heuristic CSP:
+Win rate: 8 bombs - 84.98% // 10 bombs - 72.38% // 12 bombs - 55.67%
 Neural Network:
 Win rate: 8 bombs - 0.7157 // 10 bombs - 0.5426 // 12 bombs - 0.3566
-

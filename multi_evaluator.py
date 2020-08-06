@@ -65,15 +65,15 @@ for current_game in range(num_games):
           victories += 1
         else:
           plays_to_die.append(plays-1)
-        open_percentage.append(game.get_open_percentage())
-        print('Game', current_game + 1, '/', num_games, 'Played',episodes,'/',NUM_EPISODES, "Open percentage:", game.get_open_percentage())
+        open_percentage.append(game.get_open_percentage()*100)
+        print('Game', current_game + 1, '/', num_games, 'Played',episodes,'/',NUM_EPISODES, 'Open percentage:', game.get_open_percentage()*100, '%')
     games_open_percentage.append(open_percentage)
     games_plays_to_die.append(plays_to_die)
     victory_percentage = victories / NUM_EPISODES
-    games_victory_percentage.append(victory_percentage)
+    games_victory_percentage.append(victory_percentage*100)
 
-print('Win rate:', bombs[0], 'bombs -', games_victory_percentage[0], '//', bombs[1], 'bombs -', games_victory_percentage[1], '//', bombs[2]
-, 'bombs -', games_victory_percentage[2])
+print('Win rate:', bombs[0], 'bombs -', games_victory_percentage[0], '%//', bombs[1], 'bombs -', games_victory_percentage[1], '%//', bombs[2]
+, 'bombs -', games_victory_percentage[2], '%')
 
 # Plots return history
 plt.hist(games_plays_to_die[0], bins=list(range(0,np.max(np.max(games_plays_to_die)))), label='8 Bombs', alpha=0.6, color='b')
@@ -85,9 +85,9 @@ plt.ylabel('# episodes')
 plt.title('Histogram of number of plays untill defeat')
 plt.show()
 
-plt.hist(games_open_percentage[0], label='8 Bombs', alpha=0.6, color='b')
-plt.hist(games_open_percentage[1], label='10 Bombs', alpha=0.6, color='darkgreen')
-plt.hist(games_open_percentage[2], label='12 Bombs', alpha=0.6, color='r')
+plt.hist(games_open_percentage[0], bins=20, label='8 Bombs', alpha=0.6, color='b')
+plt.hist(games_open_percentage[1], bins=20, label='10 Bombs', alpha=0.6, color='darkgreen')
+plt.hist(games_open_percentage[2], bins=20, label='12 Bombs', alpha=0.6, color='r')
 plt.legend(loc='upper left')
 plt.xlabel('% open')
 plt.ylabel('# episodes')
