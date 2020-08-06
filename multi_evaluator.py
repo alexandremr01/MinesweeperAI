@@ -24,7 +24,7 @@ def random_actor(state):
   return x, y
 
 size = 8
-NUM_EPISODES = 100
+NUM_EPISODES = 10000
 bombs = [8, 10, 12]
 
 victories = 0
@@ -45,13 +45,13 @@ games_plays_to_die = []
 games_victory_percentage = []
 for current_game in range(num_games):
     game = MinesweeperEnvironment(size, size, bombs[current_game])
-    agent = MinesweeperAgent(size, bombs[current_game])
+    #agent = MinesweeperAgent(size, bombs[current_game])
     victories = 0
     plays_to_die = []
     open_percentage = []
     for episodes in range(1, NUM_EPISODES + 1):
         state = game.reset()
-        agent.reset()
+        #agent.reset()
         plays = 0
         while game.is_finished() != True:
             #action = random_actor(game.get_state()) # Use this to test random policy
