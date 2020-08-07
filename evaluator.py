@@ -2,7 +2,7 @@ import numpy as np
 import random
 from minesweeper_environment import MinesweeperEnvironment
 from minesweeper import MinesweeperCore
-#from agents.csp import MinesweeperAgent
+from agents.csp import MinesweeperAgent
 import matplotlib.pyplot as plt
 import os
 from agents.L4MSAgent import L4MSAgent
@@ -26,37 +26,40 @@ def random_actor(state):
 
 os.environ['CUDA_VISIBLE_DEVICES'] = '-1'
 
-
+# Set game configurations. CSP can play in any board size. The remaining agents can only play in 8x8 board.
 size = 8
 NUM_EPISODES = 1000
-bombs=10
+bombs = 10
 game = MinesweeperEnvironment(size, size, bombs)
+# Choose an agent
+agent_name = 'h_csp' # h_csp (heuristic csp), nh_csp (non-heuristic csp) or l4ms
+if agent_name == 'h_csp':
+    heuristic = True
+    agent = MinesweeperAgent(size, bombs, heuristic)
+elif agent_name == 'nh_csp':
+    heuristic = False
+    agent = MinesweeperAgent(size, bombs, heuristic)
+elif agent_name == 'l4ms':
+    agent = L4MSAgent(size, bombs)
+    model = 'best_model.hdf5'
+    if os.path.exists(model):
+        print('Loading weights from previous learning session.')
+        agent.load(model)
+    else:
+        print('No weights found from previous learning session.')
 
 victories = 0
 plays_to_die = []
 open_percentage = []
 
-#agent = DQNAgent(size)
-#agent = MinesweeperAgent(size,bombs)
-agent = L4MSAgent(size, bombs)
-model = 'best_model.hdf5'
-
-if os.path.exists(model):
-    print('Loading weights from previous learning session.')
-    agent.load(model)
-else:
-    print('No weights found from previous learning session.')
-
 for episodes in range(1, NUM_EPISODES + 1):
     state = game.reset()
-    #agent.reset()
+    agent.reset()
     plays = 0
     while game.is_finished() != True:
         #action = random_actor(game.get_state()) # Use this to test random policy
         action = agent.act(game.get_state())
-        #print(action)
         next_state = game.step(action[0], action[1])
-        #game.print_board()
         state = next_state
         plays += 1
     if game.is_victory():
@@ -79,8 +82,8 @@ plt.ylabel('# episodes')
 plt.title('Histogram of number of plays untill defeat')
 plt.show()
 
-plt.hist(open_percentage)
+plt.hist(open_percentage, bins=20)
 plt.xlabel('% open')
 plt.ylabel('# episodes')
-plt.title('Histogram of open percentage (>0.8 is win)')
+plt.title('Histogram of open percentage')
 plt.show()
