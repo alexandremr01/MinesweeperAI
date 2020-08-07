@@ -56,4 +56,6 @@ class MinesweeperEnvironment:
           else:
             print(int(print_table[i, j]), end=' ')
         print("")
-      print("Bomb positions: " + str(self.game.bomb_positions))
+
+    def print_bomb_positions(self):
+         print("Bomb positions: " + str(self.game.bomb_positions))

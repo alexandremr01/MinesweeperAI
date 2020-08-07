@@ -1,15 +1,18 @@
-from minesweeper import MinesweeperCore
 import numpy as np
+from minesweeper import MinesweeperCore
+
 
 class MinesweeperConstraint:
     """
-    Base class for minesweeper constraints.
+    Base class for the minesweeper constraints.
     """
     def __init__(self, variables, value):
         """
-        Creates a constraint.
+        Creates a constraint i.e. (2, 1) + (2, 2) + (2, 3) = 2.
 
+        :param variables: list of tiles with an associated constraint.
         :type variables: list of tuples (i, j).
+        :param value: number of tiles in variables containing bombs.
         :type value: int.
         """
         self.variables = variables
@@ -17,23 +20,22 @@ class MinesweeperConstraint:
 
     def solvable(self, assignment):
         """
-        Checks if a minesweeper constraint still solvable after assignment
+        Checks if a minesweeper constraint is still solvable after assignment.
 
-        :param assignment: Maps each variable to a value
-        :type assignment: dictionary
-        :return type: bool
+        :param assignment: maps each tile to its value of containing a bomb (1 for true, 0 for false).
+        :type assignment: dictionary.
+        :return: still solvable flag
+        :rtype: bool
         """
         new_value = self.value
         non_constrained = 0
         for variable in self.variables:
             if variable not in assignment:
                 non_constrained = non_constrained + 1
-                continue
-            new_value = new_value - assignment[variable]
-        if new_value >= 0 and new_value <= non_constrained:
-            return True
-        else:
-            return False
+            else:
+                new_value = new_value - assignment[variable]
+        return 0 <= new_value <= non_constrained
+
 
 class CSPSolver:
     """
@@ -41,10 +43,12 @@ class CSPSolver:
     """
     def __init__(self, variables=[], constraints={}):
         """
+        Initializes the constraint-satisfaction problem solver.
+
+        :param variables: list of tiles with an associated constraint.
         :type variables: list of tuples (i, j).
-        :type domains: list.
+        :param constraints: maps tiles to its constraints.
         :type constraints: dictionary.
-        :type solutions: list of dictionaries.
         """
         self.variables = variables
         self.domains = [0, 1]
@@ -57,9 +61,10 @@ class CSPSolver:
 
     def add_constraint(self, constraint):
         """
-        Adds a constraint
+        Adds a constraint to each of the tiles associated with that constraint.
 
-        :type constraint: MinesweeperConstraint
+        :param constraint: minesweeper constraint.
+        :type constraint: MinesweeperConstraint.
         """
         for variable in constraint.variables:
             if variable not in self.variables:
@@ -69,11 +74,14 @@ class CSPSolver:
 
     def consistent_assignment(self, variable, assignment):
         """
-        Given a new set of assignments, checks if variable constraints
-        still have a solution.
+        Given a new set of assignments, checks if the tile's constraints still have a solution.
 
+        :param variable: position of a tile
         :type variable: tuple
-        :type assignment: dictionary
+        :param assignment: maps each tile to its value of containing a bomb (1 for true, 0 for false).
+        :type assignment: dictionary.
+        :return: contraints still solvable flag.
+        :rtype: bool.
         """
         for constraint in self.constraints[variable]:
             if not constraint.solvable(assignment):
@@ -82,10 +90,12 @@ class CSPSolver:
 
     def backtracking_search(self, assignment={}):
         """
-        Gives all solutions for the CSP
+        Produces solutions for the CSP.
 
-        :param assignment: Maps a set of variables to a value
-        :type assignment: dictionary
+        :param assignment: maps each tile to its value of containing a bomb (1 for true, 0 for false).
+        :type assignment: dictionary.
+        :return: signals the function to end search.
+        :rtype: null.
         """
         if len(assignment) == len(self.variables):
             self.solutions.append(assignment)
@@ -99,13 +109,15 @@ class CSPSolver:
             local_assignment = assignment.copy()
             local_assignment[first] = value
             if self.consistent_assignment(first, local_assignment):
-                result = self.backtracking_search(local_assignment)
+                self.backtracking_search(local_assignment)
         return None
 
     def get_answers(self):
         """
         Runs backtracking search and returns solutions.
 
+        :return: solutions to the CSP.
+        :rtype: list of dictionaries (assignments).
         """
         self.backtracking_search()
         return self.solutions
@@ -115,7 +127,17 @@ class MinesweeperAgent:
     """
     Simple strategy Minesweeper agent.
     """
-    def __init__(self, size, num_bombs):
+    def __init__(self, size, num_bombs, heuristic):
+        """
+        Initializes the Minesweeper agent considering a square board.
+
+        :param size: size of the minesweeper board (length of one side of the board).
+        :type size: int.
+        :param num_bombs: number of tiles containing a bomb on the board.
+        :type num_bombs: int.
+        :param heuristic: whether to use the corner heuristic or not.
+        :type heuristic: bool.
+        """
         self.initial_position = (int(size/2), int(size/2))
         self.board_size = size
         self.num_bombs = num_bombs
@@ -123,11 +145,11 @@ class MinesweeperAgent:
         self.nobomb_position = [self.initial_position]
         self.bomb_position = []
         self.unknown_position = []
+        self.heuristic = heuristic
 
     def reset(self):
         """
         Resets agent.
-
         """
         self.constraints = []
         self.nobomb_position = [self.initial_position]
@@ -138,42 +160,46 @@ class MinesweeperAgent:
         """
         Returns a position (i, j) to play using simple strategy.
 
+        :param board: game board.
         :type board: numpy matrix.
         """
-        if(len(self.nobomb_position) != 0):
-            return self.nobomb_position.pop(0)
         constraints, constrained_variables = self.read_board(board)
-        if(len(self.nobomb_position) != 0):
+        # Play on first known empty tile
+        if len(self.nobomb_position) != 0:
             return self.nobomb_position.pop(0)
-        if(len(self.bomb_position) == self.num_bombs):
+        # If all bombs are known, play on all other locations
+        if len(self.bomb_position) == self.num_bombs:
             for position in self.unknown_position:
-                if(position not in self.bomb_position):
+                if position not in self.bomb_position:
                     self.nobomb_position.append(position)
             return self.nobomb_position.pop(0)
+        # Corner heuristic
+        if self.heuristic:
+            corner_position = [(0, 0), (self.board_size - 1, self.board_size - 1),
+                               (0, self.board_size - 1), (self.board_size - 1, 0)]
+            for position in corner_position:
+                if position not in self.bomb_position and position in self.unknown_position:
+                    return position
+        # Gets possible answers for CSP
         csp = CSPSolver(constrained_variables, constraints)
         answers = csp.get_answers()
-        # Corner heuristic # # #
-        corner_position = [(0, 0), (self.board_size - 1, self.board_size - 1), (0, self.board_size - 1), (self.board_size - 1, 0)]
-        for position in corner_position:
-            if(position not in self.bomb_position and position in self.unknown_position):
-                return position
-        # # # # # # # # # # # # #
-        probabilities = {} # Variables as keys, [All cases, Cases of 0, Probability to be 0]
+        # Calculates probabilities and returns the tile with highest probability of not containing a bomb
+        probabilities = {}  # Variables as keys, [All cases, Cases of 0, Probability to be 0]
         for variable in constrained_variables:
             probabilities[variable] = [0, 0, 0]
-        for ans in answers:
-                for variable in ans:
-                    probabilities[variable][0] = probabilities[variable][0] + 1
-                    if(ans[variable] == 0):
-                        probabilities[variable][1] = probabilities[variable][1] + 1
+        for answer in answers:
+            for variable in answer:
+                probabilities[variable][0] += 1
+                if answer[variable] == 0:
+                    probabilities[variable][1] += 1
         best_position = [(0, 0), 0]
         for variable in constrained_variables:
-            if(probabilities[variable][0] != 0):
+            if probabilities[variable][0] != 0:
                 probabilities[variable][2] = probabilities[variable][1] / probabilities[variable][0]
-            if(probabilities[variable][2] > best_position[1] and variable not in self.bomb_position):
+            if probabilities[variable][2] > best_position[1] and variable not in self.bomb_position:
                 best_position[1] = probabilities[variable][2]
                 best_position[0] = variable
-        if(best_position[1] == 0):
+        if best_position[1] == 0:
             playable_positions = [position for position in self.unknown_position if position not in self.bomb_position]
             rand_index = np.random.randint(len(playable_positions))
             best_position[0] = playable_positions[rand_index]
@@ -181,202 +207,99 @@ class MinesweeperAgent:
 
     def read_board(self, board):
         """
-        Reads minesweeper board. Returns constraints and all variables constrained.
+        Reads minesweeper board. Returns simplified constraints and all variables constrained.
 
-        :type board: numpy matrix
+        :param board: game board.
+        :type board: numpy matrix.
+        :return: (simplified constraints, variables associated with constraints)
+        :rtype: (list of MinesweeperConstraints, list of tuples)
         """
         self.constraints = []
         self.unknown_position = []
         constrained_var = set()
         height = board.shape[0]
         width = board.shape[1]
-        variables = None
-        value = None
-        constraint = None
-        # Corner constraints
-        if(board[0, 0] == MinesweeperCore.UNKNOWN_CELL):
-            self.unknown_position.append((0, 0))
-        elif(board[0, 0] > 0):
-            variables = []
-            positions = [(0,1), (1,0), (1,1)]
-            for variable in positions:
-                if(board[variable] == MinesweeperCore.UNKNOWN_CELL):
-                    variables.append(variable)
-                    constrained_var.add(variable)
-            value = board[0, 0]
-            constraint = MinesweeperConstraint(variables, value)
-            self.constraints.append(constraint)
-        if(board[0, width-1] == MinesweeperCore.UNKNOWN_CELL):
-            self.unknown_position.append((0, width-1))
-        elif(board[0, width-1] > 0):
-            variables = []
-            positions = [(0,width-2), (1,width-1), (1,width-2)]
-            for variable in positions:
-                if(board[variable] == MinesweeperCore.UNKNOWN_CELL):
-                    variables.append(variable)
-                    constrained_var.add(variable)
-            value = board[0, width-1]
-            constraint = MinesweeperConstraint(variables, value)
-            self.constraints.append(constraint)
-        if(board[height-1, 0] == MinesweeperCore.UNKNOWN_CELL):
-            self.unknown_position.append((height-1, 0))
-        elif(board[height-1, 0] > 0):
-            variables = []
-            positions = [(height-2,0), (height-2,1), (height-1,1)]
-            for variable in positions:
-                if(board[variable] == MinesweeperCore.UNKNOWN_CELL):
-                    variables.append(variable)
-                    constrained_var.add(variable)
-            value = board[height-1, 0]
-            constraint = MinesweeperConstraint(variables, value)
-            self.constraints.append(constraint)
-        if(board[height-1,width-1] == MinesweeperCore.UNKNOWN_CELL):
-            self.unknown_position.append((height-1, width-1))
-        elif(board[height-1, width-1] > 0):
-            variables = []
-            positions = [(height-2,width-1), (height-2,width-2), (height-1,width-2)]
-            for variable in positions:
-                if(board[variable] == MinesweeperCore.UNKNOWN_CELL):
-                    variables.append(variable)
-                    constrained_var.add(variable)
-            value = board[height-1, width-1]
-            constraint = MinesweeperConstraint(variables, value)
-            self.constraints.append(constraint)
-        # Edges constraints
-        for i in range(width - 2):
-            if(board[0, i+1] == MinesweeperCore.UNKNOWN_CELL):
-                self.unknown_position.append((0, i+1))
-            elif(board[0, i+1] > 0):
+        # Creates constraints
+        # Simplified code
+        tiles = [(i, j) for i in range(height) for j in range(width)]
+        for tile in tiles:
+            if board[tile] == MinesweeperCore.UNKNOWN_CELL:
+                self.unknown_position.append(tile)
+            elif board[tile] > 0:
                 variables = []
-                positions = [(0, i), (0, i+2), (1, i), (1, i+1), (1, i+2)]
-                for variable in positions:
-                    if(board[variable] == MinesweeperCore.UNKNOWN_CELL):
-                        variables.append(variable)
-                        constrained_var.add(variable)
-                value = board[0, i+1]
+                neighbors = []
+                for i in [-1, 0, 1]:
+                    for j in [-1, 0, 1]:
+                        neighbor = (tile[0] + i, tile[1] + j)
+                        if neighbor != tile and 0 <= neighbor[0] < height and 0 <= neighbor[1] < width:
+                            neighbors.append(neighbor)
+                for neighbor in neighbors:
+                    if board[neighbor] == MinesweeperCore.UNKNOWN_CELL:
+                        variables.append(neighbor)
+                        constrained_var.add(neighbor)
+                value = board[tile]
                 constraint = MinesweeperConstraint(variables, value)
                 self.constraints.append(constraint)
-            if(board[height-1, i+1] == MinesweeperCore.UNKNOWN_CELL):
-                self.unknown_position.append((height-1, i+1))
-            elif(board[height-1, i+1] > 0):
-                variables = []
-                positions = [(height-1, i), (height-1, i+2), (height-2, i), (height-2, i+1), (height-2, i+2)]
-                for variable in positions:
-                    if(board[variable] == MinesweeperCore.UNKNOWN_CELL):
-                        variables.append(variable)
-                        constrained_var.add(variable)
-                value = board[height-1, i+1]
-                constraint = MinesweeperConstraint(variables, value)
-                self.constraints.append(constraint)
-            if(board[i+1, 0] == MinesweeperCore.UNKNOWN_CELL):
-                self.unknown_position.append((i+1, 0))
-            elif(board[i+1, 0] > 0):
-                variables = []
-                positions = [(i, 0), (i+2, 0), (i, 1), (i+1, 1), (i+2, 1)]
-                for variable in positions:
-                    if(board[variable] == MinesweeperCore.UNKNOWN_CELL):
-                        variables.append(variable)
-                        constrained_var.add(variable)
-                value = board[i+1, 0]
-                constraint = MinesweeperConstraint(variables, value)
-                self.constraints.append(constraint)
-            if(board[i+1, height-1] == MinesweeperCore.UNKNOWN_CELL):
-                self.unknown_position.append((i+1, height-1))
-            elif(board[i+1, height-1] > 0):
-                variables = []
-                positions = [(i, height-1), (i+2, height-1), (i, height-2), (i+1, height-2), (i+2, height-2)]
-                for variable in positions:
-                    if(board[variable] == MinesweeperCore.UNKNOWN_CELL):
-                        variables.append(variable)
-                        constrained_var.add(variable)
-                value = board[i+1, height-1]
-                constraint = MinesweeperConstraint(variables, value)
-                self.constraints.append(constraint)
-        # Constraints inside the board
-        for i in range(width - 2):
-            for j in range(height - 2):
-                if(board[i+1, j+1] == MinesweeperCore.UNKNOWN_CELL):
-                    self.unknown_position.append((i+1, j+1))
-                if(board[i+1, j+1] > 0):
-                    variables = []
-                    positions = [(i+1, j), (i+1, j+2), (i, j), (i, j+1), (i, j+2), (i+2, j), (i+2, j+1), (i+2, j+2)]
-                    for variable in positions:
-                        if(board[variable] == MinesweeperCore.UNKNOWN_CELL):
-                            variables.append(variable)
-                            constrained_var.add(variable)
-                    value = board[i+1, j+1]
-                    constraint = MinesweeperConstraint(variables, value)
-                    self.constraints.append(constraint)
+        ##
         # Simplifies constraints
         has_subset = True
         has_simplified_version = True
-        while(has_simplified_version == True):
+        while has_simplified_version:
             has_simplified_version = False
-            while(has_subset == True):
+            # Removes subsets of constraints
+            # Simplified code
+            while has_subset:
                 has_subset = False
                 for i in range(len(self.constraints)):
-                    j = i + 1
-                    while(j < len(self.constraints)):
-                        if(set(self.constraints[i].variables).issubset(set(self.constraints[j].variables))):
+                    for j in range(len(self.constraints)):
+                        if i != j and set(self.constraints[i].variables).issubset(set(self.constraints[j].variables)):
                             has_subset = True
-                            variables = [var for var in self.constraints[j].variables if var not in self.constraints[i].variables]
+                            variables = [var for var in self.constraints[j].variables
+                                         if var not in self.constraints[i].variables]
                             value = self.constraints[j].value - self.constraints[i].value
                             self.constraints[j].variables = variables
                             self.constraints[j].value = value
-                        if(set(self.constraints[j].variables).issubset(set(self.constraints[i].variables))):
-                            has_subset = True
-                            variables = [var for var in self.constraints[i].variables if var not in self.constraints[j].variables]
-                            value = self.constraints[i].value - self.constraints[j].value
-                            self.constraints[i].variables = variables
-                            self.constraints[i].value = value
-                        j = j + 1
                 constraints = [constraint for constraint in self.constraints if constraint.variables != []]
                 self.constraints = constraints
+            ##
+            # Removes known empty tiles
             for position in self.nobomb_position:
                 for constraint in self.constraints:
-                    if(position in constraint.variables):
+                    if position in constraint.variables:
                         has_simplified_version = True
                         constraint.variables.remove(position)
+            # Removes known tiles with bombs
             for position in self.bomb_position:
                 for constraint in self.constraints:
-                    if(position in constraint.variables):
+                    if position in constraint.variables:
                         has_simplified_version = True
                         constraint.variables.remove(position)
                         constraint.value = constraint.value - 1
             constraints = [constraint for constraint in self.constraints if constraint.variables != []]
             self.constraints = constraints
-            index_to_remove = []
-            for i in range(len(self.constraints)):
-                if(self.constraints[i].value == 0):
+            # Removes tiles in constraints with value 0 or equal to number of tiles in constraint
+            for constraint in self.constraints:
+                if constraint.value == 0:
                     has_simplified_version = True
-                    index_to_remove.append(i)
-                    for variable in self.constraints[i].variables:
-                        if(variable not in self.nobomb_position):
-                            self.nobomb_position.append(variable)
-                elif(self.constraints[i].value == len(self.constraints[i].variables)):
+                    for variable in constraint.variables:
+                        self.nobomb_position.append(variable)
+                    constraints.remove(constraint)
+                elif constraint.value == len(constraint.variables):
                     has_simplified_version = True
-                    index_to_remove.append(i)
-                    for variable in self.constraints[i].variables:
-                        if(variable not in self.bomb_position):
-                            self.bomb_position.append(variable)
-            for i in range(len(self.constraints)):
-                j = i + 1
-                while(j < len(self.constraints)):
-                    if(set(self.constraints[i].variables).issubset(set(self.constraints[j].variables))):
-                        has_subset = True
-                        has_simplified_version = True
-                    if(set(self.constraints[j].variables).issubset(set(self.constraints[i].variables))):
-                        has_subset = True
-                        has_simplified_version = True
-                    j = j + 1
-            constraints = []
-            for index in range(len(self.constraints)):
-                if(index not in index_to_remove):
-                    constraints.append(self.constraints[index])
+                    for variable in constraint.variables:
+                        self.bomb_position.append(variable)
+                    constraints.remove(constraint)
             self.constraints = constraints
-        # Removes trivials contraints from constrained_var
+            # Simplified code
+            for i in range(len(self.constraints)):
+                for j in range(len(self.constraints)):
+                    if i != j and set(self.constraints[i].variables).issubset(set(self.constraints[j].variables)):
+                        has_simplified_version = True
+                        has_subset = True
+            ##
+        # Removes trivial contraints from constrained_var
         non_trivials_constrained_var = []
         for variable in constrained_var:
-            if(variable not in self.bomb_position and variable not in self.nobomb_position):
+            if variable not in self.bomb_position and variable not in self.nobomb_position:
                 non_trivials_constrained_var.append(variable)
         return self.constraints, non_trivials_constrained_var

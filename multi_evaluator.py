@@ -23,42 +23,49 @@ def random_actor(state):
       break
   return x, y
 
+# Set game configurations. CSP can play in any board size. The remaining agents can only play in 8x8 board.
 size = 8
-NUM_EPISODES = 10000
+NUM_EPISODES = 100
 bombs = [8, 10, 12]
+# Choose an agent
+agent_name = 'h_csp' # h_csp (heuristic csp), nh_csp (non-heuristic csp) or l4ms
+
+##
+if agent_name == 'l4ms':
+    agent = L4MSAgent(size)
+    weights = 'results/best_model.hdf5'
+    if os.path.exists(weights):
+        print('Loading weights from previous learning session.')
+        agent.load(weights)
+    else:
+        print('No weights found from previous learning session.')
 
 victories = 0
 plays_to_die = []
 open_percentage = []
-
-agent = L4MSAgent(size)
-weights = 'results/best_model.hdf5'
-if os.path.exists(weights):
-    print('Loading weights from previous learning session.')
-    agent.load(weights)
-else:
-    print('No weights found from previous learning session.')
-
-num_games = 3
+num_games = 3 # Do not change this line
 games_open_percentage = []
 games_plays_to_die = []
 games_victory_percentage = []
 for current_game in range(num_games):
     game = MinesweeperEnvironment(size, size, bombs[current_game])
-    #agent = MinesweeperAgent(size, bombs[current_game])
+    if agent_name == 'h_csp':
+        heuristic = True
+        agent = MinesweeperAgent(size, bombs[current_game], heuristic)
+    elif agent_name == 'nh_csp':
+        heuristic = False
+        agent = MinesweeperAgent(size, bombs[current_game], heuristic)
     victories = 0
     plays_to_die = []
     open_percentage = []
     for episodes in range(1, NUM_EPISODES + 1):
         state = game.reset()
-        #agent.reset()
+        agent.reset()
         plays = 0
         while game.is_finished() != True:
             #action = random_actor(game.get_state()) # Use this to test random policy
             action = agent.act(game.get_state())
-            #print(action)
             next_state = game.step(action[0], action[1])
-            #game.print_board(True)
             state = next_state
             plays += 1
         if game.is_victory():
@@ -72,7 +79,7 @@ for current_game in range(num_games):
     victory_percentage = victories / NUM_EPISODES
     games_victory_percentage.append(victory_percentage*100)
 
-print('Win rate:', bombs[0], 'bombs -', games_victory_percentage[0], '%//', bombs[1], 'bombs -', games_victory_percentage[1], '%//', bombs[2]
+print('Win rate:\n', bombs[0], 'bombs -', games_victory_percentage[0], '%\n', bombs[1], 'bombs -', games_victory_percentage[1], '%\n', bombs[2]
 , 'bombs -', games_victory_percentage[2], '%')
 
 # Plots return history
