@@ -33,7 +33,7 @@ Usage:
 
 For a given **size** x **size** board with **bombs** number of mines, runs one match and prints the board configuration for each move. Assign the following names to **agent_name** to choose an agent:
 
-> - h_csp for heuristic CSP.
+- h_csp for heuristic CSP.
 - nh_csp for non-heuristic CSP.
 - l4ms for supervised learning agent.
 
