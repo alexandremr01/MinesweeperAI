@@ -1,5 +1,13 @@
 import glob
 import numpy as np
+
+# This file pre-processes the dataset mapping X to Y by
+# concatenating all dataset files,
+# removing the repeated game states in X and finally
+# creating two new files for X and Y which will be used
+# in training.
+
+
 filesX = sorted(glob.glob("dataset/dataset_X*"))
 filesY = sorted(glob.glob("dataset/dataset_Y*"))
 

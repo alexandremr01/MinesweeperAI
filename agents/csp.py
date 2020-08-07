@@ -127,7 +127,7 @@ class MinesweeperAgent:
     """
     Simple strategy Minesweeper agent.
     """
-    def __init__(self, size, num_bombs, heuristic):
+    def __init__(self, size, num_bombs, heuristic=True):
         """
         Initializes the Minesweeper agent considering a square board.
 
@@ -146,7 +146,7 @@ class MinesweeperAgent:
         self.bomb_position = []
         self.unknown_position = []
         self.heuristic = heuristic
-        self.guess_flag = False # Verifies if the agent made a guess
+        self.guess_flag = False  # Verifies if the agent has made a guess
 
     def reset(self):
         """
@@ -225,7 +225,6 @@ class MinesweeperAgent:
         height = board.shape[0]
         width = board.shape[1]
         # Creates constraints
-        # Simplified code
         tiles = [(i, j) for i in range(height) for j in range(width)]
         for tile in tiles:
             if board[tile] == MinesweeperCore.UNKNOWN_CELL:
@@ -245,14 +244,12 @@ class MinesweeperAgent:
                 value = board[tile]
                 constraint = MinesweeperConstraint(variables, value)
                 self.constraints.append(constraint)
-        ##
         # Simplifies constraints
         has_subset = True
         has_simplified_version = True
         while has_simplified_version:
             has_simplified_version = False
             # Removes subsets of constraints
-            # Simplified code
             while has_subset:
                 has_subset = False
                 for i in range(len(self.constraints)):
@@ -266,7 +263,6 @@ class MinesweeperAgent:
                             self.constraints[j].value = value
                 constraints = [constraint for constraint in self.constraints if constraint.variables != []]
                 self.constraints = constraints
-            ##
             # Removes known empty tiles
             for position in self.nobomb_position:
                 for constraint in self.constraints:
@@ -295,13 +291,11 @@ class MinesweeperAgent:
                         self.bomb_position.append(variable)
                     constraints.remove(constraint)
             self.constraints = constraints
-            # Simplified code
             for i in range(len(self.constraints)):
                 for j in range(len(self.constraints)):
                     if i != j and set(self.constraints[i].variables).issubset(set(self.constraints[j].variables)):
                         has_simplified_version = True
                         has_subset = True
-            ##
         # Removes trivial contraints from constrained_var
         non_trivials_constrained_var = []
         for variable in constrained_var:

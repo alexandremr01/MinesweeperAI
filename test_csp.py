@@ -1,9 +1,9 @@
-from agents.csp import MinesweeperConstraint, MinesweeperCSP
+from agents.csp import MinesweeperConstraint, CSPSolver
 
-constrained_variables = [(0,1), (0,2), (0,3), (0,4)]
-constraint_1 = MinesweeperConstraint([(0,1), (0,2)], 1)
-constraint_2 = MinesweeperConstraint([(0,3), (0,4)], 1)
-CSP = MinesweeperCSP(constrained_variables, {})
+constrained_variables = [(0, 1), (0, 2), (0, 3), (0, 4)]
+constraint_1 = MinesweeperConstraint([(0, 1), (0, 2)], 1)
+constraint_2 = MinesweeperConstraint([(0, 3), (0, 4)], 1)
+CSP = CSPSolver(constrained_variables, {})
 CSP.add_constraint(constraint_1)
 CSP.add_constraint(constraint_2)
 assignment = {}

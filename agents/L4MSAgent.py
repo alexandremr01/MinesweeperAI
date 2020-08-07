@@ -18,24 +18,12 @@ class L4MSAgent:
     """
     def __init__(self, side, learning_rate=0.001):
         """
-        Creates a Deep Q-Networks (DQN) agent.
+        Initializes the minesweeper agent.
 
-        :param state_size: number of dimensions of the feature vector of the state.
-        :type state_size: int.
-        :param action_size: number of actions.
-        :type action_size: int.
-        :param gamma: discount factor.
-        :type gamma: float.
-        :param epsilon: epsilon used in epsilon-greedy policy.
-        :type epsilon: float.
-        :param epsilon_min: minimum epsilon used in epsilon-greedy policy.
-        :type epsilon_min: float.
-        :param epsilon_decay: decay of epsilon per episode.
-        :type epsilon_decay: float.
-        :param learning_rate: learning rate of the action-value neural network.
+        :param side: length of one side of the minesweeeper board.
+        :type side: int.
+        :param learning_rate: learning rate for the network.
         :type learning_rate: float.
-        :param buffer_size: size of the experience replay buffer.
-        :type buffer_size: int.
         """
         self.side = side
         self.learning_rate = learning_rate
@@ -43,29 +31,33 @@ class L4MSAgent:
 
     def make_model(self):
         """
-        Makes the action-value neural network model using Keras.
+        Makes and returns the action-value neural network model using Keras.
 
         :return: action-value neural network.
         :rtype: Keras' model.
         """
         input_data = Input(shape=(self.side, self.side, 1))
         # Layer 1
-        layer = Conv2D(filters=64, kernel_size=(3, 3), strides=(1, 1), padding='same', name='conv_1', use_bias=False)(input_data)
+        layer = Conv2D(filters=64, kernel_size=(3, 3), strides=(1, 1),
+                       padding='same', name='conv_1', use_bias=False)(input_data)
         layer = BatchNormalization(name='norm_1')(layer)
         layer = ReLU()(layer)
 
         # Layer 2
-        layer = Conv2D(filters=64, kernel_size=(3, 3), strides=(1, 1), padding='same', name='conv_2', use_bias=False)(layer)
+        layer = Conv2D(filters=64, kernel_size=(3, 3), strides=(1, 1),
+                       padding='same', name='conv_2', use_bias=False)(layer)
         layer = BatchNormalization(name='norm_2')(layer)
         layer = ReLU()(layer)
 
         # Layer 2
-        layer = Conv2D(filters=128, kernel_size=(3, 3), strides=(1, 1), padding='same', name='conv_3', use_bias=False)(layer)
+        layer = Conv2D(filters=128, kernel_size=(3, 3), strides=(1, 1),
+                       padding='same', name='conv_3', use_bias=False)(layer)
         layer = BatchNormalization(name='norm_3')(layer)
         layer = ReLU()(layer)
 
         # Layer 4
-        layer = Conv2D(filters=128, kernel_size=(3, 3), strides=(1, 1), padding='same', name='conv_4', use_bias=False)(layer)
+        layer = Conv2D(filters=128, kernel_size=(3, 3), strides=(1, 1),
+                       padding='same', name='conv_4', use_bias=False)(layer)
         layer = BatchNormalization(name='norm_4')(layer)
         layer = ReLU()(layer)
 
@@ -82,6 +74,14 @@ class L4MSAgent:
         return model
 
     def adjust_shape(self, table):
+        """
+        Adjusts the shape of the game board from a matrix to a full long vector.
+
+        :param table: mine sweeper game board.
+        :type table: Numpy matrix.
+        :return: the newly shaped game board to a vector.
+        :rtype: Numpy array.
+        """
         table = (table+1)/10.0
         table = np.expand_dims(table, axis=0)
         table = np.expand_dims(table, axis=0)
@@ -99,7 +99,7 @@ class L4MSAgent:
         """
         input_state = self.adjust_shape(state)
         output = self.model.predict(input_state)
-        #print(output)
+        # print(output)
         while True:
             index = np.argmax(output)
             i = index // self.side
@@ -128,5 +128,3 @@ class L4MSAgent:
         """
         self.model.save_weights(name)
 
-    def reset(self):
-        pass
