@@ -146,6 +146,7 @@ class MinesweeperAgent:
         self.bomb_position = []
         self.unknown_position = []
         self.heuristic = heuristic
+        self.guess_flag = False # Verifies if the agent made a guess
 
     def reset(self):
         """
@@ -155,6 +156,7 @@ class MinesweeperAgent:
         self.nobomb_position = [self.initial_position]
         self.bomb_position = []
         self.unknown_position = []
+        self.guess_flag = False
 
     def act(self, board):
         """
@@ -165,6 +167,7 @@ class MinesweeperAgent:
         """
         constraints, constrained_variables = self.read_board(board)
         # Play on first known empty tile
+        self.guess_flag = False
         if len(self.nobomb_position) != 0:
             return self.nobomb_position.pop(0)
         # If all bombs are known, play on all other locations
@@ -179,6 +182,7 @@ class MinesweeperAgent:
                                (0, self.board_size - 1), (self.board_size - 1, 0)]
             for position in corner_position:
                 if position not in self.bomb_position and position in self.unknown_position:
+                    self.guess_flag = True
                     return position
         # Gets possible answers for CSP
         csp = CSPSolver(constrained_variables, constraints)
@@ -203,6 +207,7 @@ class MinesweeperAgent:
             playable_positions = [position for position in self.unknown_position if position not in self.bomb_position]
             rand_index = np.random.randint(len(playable_positions))
             best_position[0] = playable_positions[rand_index]
+        self.guess_flag = True
         return best_position[0]
 
     def read_board(self, board):

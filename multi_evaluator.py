@@ -25,7 +25,7 @@ def random_actor(state):
 
 # Set game configurations. CSP can play in any board size. The remaining agents can only play in 8x8 board.
 size = 8
-NUM_EPISODES = 100
+NUM_EPISODES = 10000
 bombs = [8, 10, 12]
 # Choose an agent
 agent_name = 'h_csp' # h_csp (heuristic csp), nh_csp (non-heuristic csp) or l4ms
@@ -47,6 +47,8 @@ num_games = 3 # Do not change this line
 games_open_percentage = []
 games_plays_to_die = []
 games_victory_percentage = []
+game_guesses = [] # Just for h_csp or nh_csp
+guesses = [] # Just for h_csp or nh_csp
 for current_game in range(num_games):
     game = MinesweeperEnvironment(size, size, bombs[current_game])
     if agent_name == 'h_csp':
@@ -58,22 +60,30 @@ for current_game in range(num_games):
     victories = 0
     plays_to_die = []
     open_percentage = []
+    guesses = []
     for episodes in range(1, NUM_EPISODES + 1):
         state = game.reset()
         agent.reset()
         plays = 0
+        guess_percentage = 0
         while game.is_finished() != True:
             #action = random_actor(game.get_state()) # Use this to test random policy
             action = agent.act(game.get_state())
             next_state = game.step(action[0], action[1])
+            if agent_name == 'h_csp' or agent_name == 'nh_csp':
+                if agent.guess_flag == True:
+                    guess_percentage = game.get_open_percentage()*100
             state = next_state
             plays += 1
         if game.is_victory():
           victories += 1
+          if agent_name == 'h_csp' or agent_name == 'nh_csp':
+              guesses.append(guess_percentage)
         else:
           plays_to_die.append(plays-1)
         open_percentage.append(game.get_open_percentage()*100)
         print('Game', current_game + 1, '/', num_games, 'Played',episodes,'/',NUM_EPISODES, 'Open percentage:', game.get_open_percentage()*100, '%')
+    game_guesses.append(guesses)
     games_open_percentage.append(open_percentage)
     games_plays_to_die.append(plays_to_die)
     victory_percentage = victories / NUM_EPISODES
@@ -100,3 +110,13 @@ plt.xlabel('% open')
 plt.ylabel('# episodes')
 plt.title('Histogram of open percentage')
 plt.show()
+
+if agent_name == 'h_csp' or agent_name == 'nh_csp':
+    plt.hist(game_guesses[0], bins=20, label='8 Bombs', alpha=0.6, color='b')
+    plt.hist(game_guesses[1], bins=20, label='10 Bombs', alpha=0.6, color='darkgreen')
+    plt.hist(game_guesses[2], bins=20, label='12 Bombs', alpha=0.6, color='r')
+    plt.legend(loc='upper right')
+    plt.xlabel('% open ')
+    plt.ylabel('# episodes')
+    plt.title('Board open percentage after the last guess')
+    plt.show()
