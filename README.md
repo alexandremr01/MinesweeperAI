@@ -20,9 +20,9 @@
 
 # Dataset generation
 
-The datagen script automatically generate and store dataset in batches. Dataset size is defined as number of board-action pairs. Set in the datagen script the total desired size and size per file, an then run it.
+The datagen script automatically generates and stores the dataset in batches. Dataset size is defined as the number of board-action pairs. Set in the datagen script the desired total size and size per file then run it.
 
-After generating the desired amount (recommended: at least 100k), use the preprocess_dataset script to remove non-unique boards and unite all unique in a single file.
+After generating the desired amount (recommended: at least 100k), use the preprocess_dataset script to remove non-unique boards and unite all uniques in a single file.
 
 Usage:
 
@@ -37,7 +37,7 @@ For a given **size** x **size** board with **bombs** number of mines, runs one m
 - nh_csp for non-heuristic CSP.
 - l4ms for supervised learning agent.
 
-The CSP can play in any board size. The remaining agents can only play in 8x8 board.
+The CSP can play in any board size. The remaining agents can only play in an 8x8 board.
 
 Usage:
 
@@ -47,9 +47,9 @@ Usage:
 
 The game is set similar to Agent visualizer.
 
-The single evaluator script runs **NUM_EPISODES** games and gives three metrics: number of plays until defeat, board open percentage, and win rate.
+The single evaluator script runs **NUM_EPISODES** games and returns three metrics: number of plays until defeat, board open percentage, and win rate.
 
-The multiple evaluator script gives the same metrics but for three same dimension boards with different number of mines.
+The multiple evaluator script returns the same metrics but for three same dimension boards with different numbers of mines.
 
 Usage:
 
