@@ -7,23 +7,26 @@ from tensorflow.keras.preprocessing.image import ImageDataGenerator
 from tensorflow.keras.utils import to_categorical
 from tensorflow.keras.callbacks import TensorBoard, ModelCheckpoint
 from agents.L4MSAgent import L4MSAgent
-
-# Comment this line to enable training using your GPU
-#os.environ['CUDA_VISIBLE_DEVICES'] = '-1'
-
-EPOCHS = 10
-BATCH_SIZE = 128
-
 from tensorflow.compat.v1 import ConfigProto
 from tensorflow.compat.v1 import InteractiveSession
 
 config = ConfigProto()
 config.gpu_options.allow_growth = True
 session = InteractiveSession(config=config)
+
+# Comment this line to enable training using your GPU
+# os.environ['CUDA_VISIBLE_DEVICES'] = '-1'
+
+# Training configuration
+EPOCHS = 10
+BATCH_SIZE = 128
+
+# Loads training set
 train_features = np.load('dataset/dataset_X.npy')
-train_features = (train_features+1)/10.0
+train_features = (train_features + 1) / 10.0
 train_labels = np.load('dataset/dataset_Y.npy')
 
+# Splits training set into train and cross-validation sets
 train_features, validation_features, train_labels, validation_labels = \
     train_test_split(train_features, train_labels, test_size=0.05, random_state=3)
 
@@ -32,6 +35,8 @@ print('# of cross-validation set:', validation_features.shape[0])
 
 print('X shape: ', train_features.shape)
 print('Y shape: ', train_labels.shape)
+
+# Minesweeper agent configuration
 side = 8
 bombs = 10
 agent = L4MSAgent(side)
@@ -54,7 +59,7 @@ else:
 checkpoint = ModelCheckpoint("best_model.hdf5", monitor='loss', verbose=1, save_best_only=True, mode='auto', period=1)
 tensorboard = TensorBoard(log_dir="logs")
 agent.model.fit(train_generator, steps_per_epoch=steps_per_epoch, epochs=EPOCHS,
-          validation_data=validation_generator, validation_steps=validation_steps,
-          shuffle=True, callbacks=[tensorboard, checkpoint])
+                validation_data=validation_generator, validation_steps=validation_steps,
+                shuffle=True, callbacks=[tensorboard, checkpoint])
 
 agent.model.save_weights('final_weights.h5')
