@@ -42,11 +42,14 @@ else:
 num_games = 3
 games_open_percentage = []
 games_plays_to_die = []
+games_wrong_plays = []
 games_victory_percentage = []
 for current_game in range(num_games):
     game = MinesweeperEnvironment(size, size, bombs[current_game])
     #agent = MinesweeperAgent(size, bombs[current_game])
     victories = 0
+    agent.num_incorretas = 0
+    agent.num_plays = 0
     plays_to_die = []
     open_percentage = []
     for episodes in range(1, NUM_EPISODES + 1):
@@ -71,9 +74,15 @@ for current_game in range(num_games):
     games_plays_to_die.append(plays_to_die)
     victory_percentage = victories / NUM_EPISODES
     games_victory_percentage.append(victory_percentage*100)
+    wrong_percentage = agent.num_incorretas / agent.num_plays
+    games_wrong_plays.append(wrong_percentage*100)
 
 print('Win rate:', bombs[0], 'bombs -', games_victory_percentage[0], '%//', bombs[1], 'bombs -', games_victory_percentage[1], '%//', bombs[2]
 , 'bombs -', games_victory_percentage[2], '%')
+
+print('Wrong plays rate:', bombs[0], 'bombs -', games_wrong_plays[0], '%//', bombs[1], 'bombs -', games_wrong_plays[1], '%//', bombs[2]
+, 'bombs -', games_wrong_plays[2], '%')
+
 
 # Plots return history
 plt.hist(games_plays_to_die[0], bins=list(range(0,np.max(np.max(games_plays_to_die)))), label='8 Bombs', alpha=0.6, color='b')

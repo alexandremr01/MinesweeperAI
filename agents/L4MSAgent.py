@@ -40,6 +40,8 @@ class L4MSAgent:
         self.side = side
         self.learning_rate = learning_rate
         self.model = self.make_model()
+        self.num_incorretas = 0                        # this is only used of research purpose
+        self.num_plays = 0
 
     def make_model(self):
         """
@@ -100,11 +102,13 @@ class L4MSAgent:
         input_state = self.adjust_shape(state)
         output = self.model.predict(input_state)
         #print(output)
+        self.num_plays = self.num_plays + 1
         while True:
             index = np.argmax(output)
             i = index // self.side
             j = index % self.side
             if state[i, j] != MinesweeperCore.UNKNOWN_CELL:
+                self.num_incorretas = self.num_incorretas + 1
                 output[0, index] = -inf
             else:
                 break

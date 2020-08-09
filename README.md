@@ -27,6 +27,15 @@ Usage:
         python datagen.py
         python preprocess_dataset.py
 
+# Neural network training
+
+The train_supervised.py script 
+
+Usage:
+
+        python datagen.py
+        python preprocess_dataset.py
+
 
 
 
