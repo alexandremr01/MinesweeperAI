@@ -24,7 +24,7 @@
 
 The datagen script automatically generates and stores the dataset in batches. Dataset size is defined as the number of board-action pairs. Set in the datagen script the desired total size and size per file then run it.
 
-After generating the desired amount (recommended: at least 100k), use the preprocess_dataset script to remove non-unique boards and unite all uniques in a single file.
+After generating the desired amount (recommended: at least 100k, 8.45 million were used for the research), use the preprocess_dataset script to remove non-unique boards and unite all uniques in a single file.
 
 Usage:
 
@@ -63,5 +63,5 @@ The multiple evaluator script returns the same metrics but for three same dimens
 
 Usage:
 
-        python evaluator.py
+        python single_evaluator.py
         python multi_evaluator.py
