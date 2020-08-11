@@ -7,12 +7,16 @@ import matplotlib.pyplot as plt
 import os
 from agents.L4MSAgent import L4MSAgent
 # This script runs an actor and evaluate it.
-from tensorflow.compat.v1 import ConfigProto
-from tensorflow.compat.v1 import InteractiveSession
 
-config = ConfigProto()
-config.gpu_options.allow_growth = True
-session = InteractiveSession(config=config)
+# Some PCs needed these configurations in order to run with GPU.
+# from tensorflow.compat.v1 import ConfigProto
+# from tensorflow.compat.v1 import InteractiveSession
+# config = ConfigProto()
+# config.gpu_options.allow_growth = True
+# session = InteractiveSession(config=config)
+
+#  Comment this line to enable running using your GPU
+os.environ['CUDA_VISIBLE_DEVICES'] = '-1'
 
 def random_actor(state):
   size = state.shape[0]
@@ -28,7 +32,7 @@ size = 8
 NUM_EPISODES = 10000
 bombs = [8, 10, 12]
 # Choose an agent
-agent_name = 'h_csp' # h_csp (heuristic csp), nh_csp (non-heuristic csp) or l4ms
+agent_name = 'l4ms' # h_csp (heuristic csp), nh_csp (non-heuristic csp) or l4ms
 
 ##
 if agent_name == 'l4ms':

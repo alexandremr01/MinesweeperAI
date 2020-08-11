@@ -1,6 +1,6 @@
 import numpy as np
 from minesweeper import MinesweeperCore
-
+from agents.abstract_agent import AbstractAgent
 
 class MinesweeperConstraint:
     """
@@ -123,7 +123,7 @@ class CSPSolver:
         return self.solutions
 
 
-class MinesweeperAgent:
+class MinesweeperAgent (AbstractAgent):
     """
     Simple strategy Minesweeper agent.
     """

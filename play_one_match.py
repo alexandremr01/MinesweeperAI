@@ -7,6 +7,7 @@ from minesweeper import MinesweeperCore
 from agents.csp import MinesweeperAgent
 from agents.L4MSAgent import L4MSAgent
 
+os.environ['CUDA_VISIBLE_DEVICES'] = '-1'
 # Set game configurations. CSP can play in any board size. The remaining agents can only play in 8x8 board.
 size = 8
 bombs = 10
@@ -23,7 +24,7 @@ elif agent_name == 'nh_csp':
     agent = MinesweeperAgent(size, bombs, heuristic)
 elif agent_name == 'l4ms':
     agent = L4MSAgent(size, bombs)
-    model = 'best_model.hdf5'
+    model = 'results/best_model.hdf5'
     if os.path.exists(model):
         print('Loading weights from previous learning session.')
         agent.load(model)

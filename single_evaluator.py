@@ -8,12 +8,16 @@ import os
 from agents.L4MSAgent import L4MSAgent
 
 # This script runs an actor and evaluates it.
-from tensorflow.compat.v1 import ConfigProto
-from tensorflow.compat.v1 import InteractiveSession
 
-config = ConfigProto()
-config.gpu_options.allow_growth = True
-session = InteractiveSession(config=config)
+# Some PCs needed these configurations in order to run with GPU.
+# from tensorflow.compat.v1 import ConfigProto
+# from tensorflow.compat.v1 import InteractiveSession
+# config = ConfigProto()
+# config.gpu_options.allow_growth = True
+# session = InteractiveSession(config=config)
+
+#  Comment this line to enable running using your GPU
+os.environ['CUDA_VISIBLE_DEVICES'] = '-1'
 
 
 def random_actor(state):
@@ -26,7 +30,6 @@ def random_actor(state):
     return x, y
 
 
-os.environ['CUDA_VISIBLE_DEVICES'] = '-1'
 
 # Set game configurations. CSP can play in any board size. The remaining agents can only play in 8x8 board.
 size = 8
@@ -42,8 +45,8 @@ elif agent_name == 'nh_csp':
     heuristic = False
     agent = MinesweeperAgent(size, bombs, heuristic)
 elif agent_name == 'l4ms':
-    agent = L4MSAgent(size, bombs)
-    model = 'best_model.hdf5'
+    agent = L4MSAgent(size)
+    model = 'results/best_model.hdf5'
     if os.path.exists(model):
         print('Loading weights from previous learning session.')
         agent.load(model)

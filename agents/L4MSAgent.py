@@ -10,9 +10,9 @@ from tensorflow.keras.models import Model
 from math import inf
 from minesweeper import MinesweeperCore
 from tensorflow.keras.optimizers import SGD
+from agents.abstract_agent import AbstractAgent
 
-
-class L4MSAgent:
+class L4MSAgent (AbstractAgent):
     """
     Represents a 6-Layer MineSweeper Agent.
     """
