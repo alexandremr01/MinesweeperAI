@@ -14,8 +14,10 @@
 
 # Directory structure
     .
-    ├── agents                  # 3 agents: CSP, Imitator and Enhanced
+    ├── agents                  # 2 agents: CSP and L4MS (4-Layer MineSweeper, standing for the 4 convolutional layers)
     ├── dataset                 # Dataset is generated and stored here
+    ├── logs                    # Tensorboard logs
+    ├── results                 # Trained weights and some images
     └── README.md
 
 # Dataset generation
@@ -35,8 +37,7 @@ The train_supervised.py script
 
 Usage:
 
-        python datagen.py
-        python preprocess_dataset.py
+        python train_supervised.py
 
 # Agent visualizer
 
