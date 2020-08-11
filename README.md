@@ -5,9 +5,7 @@
 - [Neural network training](#neural_network_training)
 - [Agent visualizer](#agent_visualizer)
 - [Evaluator](#evaluator)
-
 - [Team](#team)
-- [License](#license)
 
 
 > **_NOTE:_** Bold words are variables from .py files.
@@ -33,7 +31,7 @@ Usage:
 
 # Neural network training
 
-The train_supervised.py script 
+This script loads the dataset, normalizes it and train the CNN model.
 
 Usage:
 
@@ -65,3 +63,9 @@ Usage:
 
         python single_evaluator.py
         python multi_evaluator.py
+
+# Team
+
+- [Alexandre Maranhão](https://github.com/alexandremr01)
+- [Alvaro Tedeschi](https://github.com/atedesch1)
+- [Davi Vasconcelos](https://github.com/vasconcelosdavi)
