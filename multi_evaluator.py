@@ -29,7 +29,7 @@ def random_actor(state):
 
 # Set game configurations. CSP can play in any board size. The remaining agents can only play in 8x8 board.
 size = 8
-NUM_EPISODES = 10000
+NUM_EPISODES = 10
 bombs = [8, 10, 12]
 # Choose an agent
 agent_name = 'l4ms' # h_csp (heuristic csp), nh_csp (non-heuristic csp) or l4ms
@@ -63,8 +63,9 @@ for current_game in range(num_games):
         heuristic = False
         agent = MinesweeperAgent(size, bombs[current_game], heuristic)
     victories = 0
-    agent.num_incorretas = 0
-    agent.num_plays = 0
+    if agent_name == 'l4ms':
+        agent.num_incorretas = 0
+        agent.num_plays = 0
     plays_to_die = []
     open_percentage = []
     guesses = []
@@ -95,14 +96,16 @@ for current_game in range(num_games):
     games_plays_to_die.append(plays_to_die)
     victory_percentage = victories / NUM_EPISODES
     games_victory_percentage.append(victory_percentage*100)
-    wrong_percentage = agent.num_incorretas / agent.num_plays
-    games_wrong_plays.append(wrong_percentage*100)
+    if agent_name == 'l4ms':
+        wrong_percentage = agent.num_incorretas / agent.num_plays
+        games_wrong_plays.append(wrong_percentage*100)
 
 print('Win rate:\n', bombs[0], 'bombs -', games_victory_percentage[0], '%\n', bombs[1], 'bombs -', games_victory_percentage[1], '%\n', bombs[2]
 , 'bombs -', games_victory_percentage[2], '%')
 
-print('Wrong plays rate:', bombs[0], 'bombs -', games_wrong_plays[0], '%//', bombs[1], 'bombs -', games_wrong_plays[1], '%//', bombs[2]
-, 'bombs -', games_wrong_plays[2], '%')
+if agent_name == 'l4ms':
+    print('Wrong plays rate:', bombs[0], 'bombs -', games_wrong_plays[0], '%//', bombs[1], 'bombs -', games_wrong_plays[1], '%//', bombs[2]
+    , 'bombs -', games_wrong_plays[2], '%')
 
 
 # Plots return history
@@ -131,5 +134,5 @@ if agent_name == 'h_csp' or agent_name == 'nh_csp':
     plt.legend(loc='upper right')
     plt.xlabel('% open ')
     plt.ylabel('# episodes')
-    plt.title('Board open percentage after the last guess')
+    plt.title('Open board percentage after last guessed move')
     plt.show()
