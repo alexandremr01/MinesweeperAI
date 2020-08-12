@@ -55,7 +55,7 @@ Usage:
 
 The game is set similar to Agent visualizer.
 
-The single evaluator script runs **NUM_EPISODES** games and returns three metrics: number of plays until defeat, board open percentage, and win rate.
+The single evaluator script runs **NUM_EPISODES** games and returns three metrics: number of plays until defeat, open board percentage, and win rate.
 
 The multiple evaluator script returns the same metrics but for three same dimension boards with different numbers of mines.
 
